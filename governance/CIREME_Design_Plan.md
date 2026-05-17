@@ -16,8 +16,8 @@ approved here.
 | Design phase | Scope | Status |
 |---|---|---|
 | 1 | Visual strategy + UX foundation | **Approved** |
-| 2 | Design system foundation | **Delivered — awaiting approval** |
-| 3 | Public experience design | Pending |
+| 2 | Design system foundation | **Approved** |
+| 3 | Public experience design | **Delivered — awaiting approval** |
 | 4 | Login + role entry | Pending |
 | 5 | Admin experience | Pending |
 | 6 | Broker experience | Pending |
@@ -404,3 +404,116 @@ map/geodata (#1), RPPI source (#2), leads modeling (#8). New in Phase 2:
 Phase 2 delivered. Phase 3 (public experience design) will not start until
 this system is approved and, ideally, Phase 1 risk #1 (map/geodata) has a
 direction since it shapes the Listings page.
+
+---
+
+# DESIGN PHASE 3 — PUBLIC EXPERIENCE DESIGN
+
+## 1. PHASE SUMMARY
+Designs the six public pages — Home, Listings, Listing Detail, Tools, Partners,
+Partner Application — applying (not redefining) the Phase 2 system. Grounded in
+the real public-safe data (`toPublicListing`: id, publicReference, title,
+propertyType, status, district, tenure, priceKyd, bedrooms, bathrooms,
+areaSqFt, publicDescription, publishedAt) and media via `/api/media/[...key]`.
+Working assumption (Phase 1 risk #1 unanswered): **map = district-centroid
+clustering, no precise coordinates**.
+
+## 2. EXPERIENCE GOALS
+Aspirational, trustworthy, easy to browse. Photography is the product; data is
+honest and scannable; tools are discoverable; one calm inquiry path. Nothing
+implies CIREME brokers deals or sets commissions (positioning + legal).
+
+## 3. VISUAL DIRECTION
+Public light mode: `--canvas` background, `--surface` cards, Fraunces for hero
+and section headers, Inter for everything else, gold reserved for primary CTAs
+and the Promoted marker/pill. Generous whitespace; full-bleed imagery; e2 hover
+lift on cards; motion ≤200ms.
+
+## 4. UX / INFORMATION ARCHITECTURE
+Public shell = sticky top nav (Logo · Home · Listings · Tools · Partners ·
+`Login ▾`), content, then a trust-forward footer (who CIREME is/ is not, legal
+links, reference to data discipline). Footer is constant across all public
+pages. Single inquiry model: every inquiry CTA opens the same Inquiry sheet
+(listing-aware). No account required to inquire or use tools.
+
+## 5. PAGE / SCREEN STRUCTURE
+
+**Home** — (1) Hero: full-bleed Cayman property image, Fraunces display-l
+headline stating the promise (“Cayman property, listed openly”), one-line
+subhead, primary CTA “Browse listings”, secondary “Try the tools”. (2) Compact
+search bar overlapping hero base (district select, type, price range) → submits
+to Listings. (3) Featured/Promoted strip: 3–4 promoted cards. (4) “How CIREME
+is different” triptych (open · independent · Cayman-correct) — editorial, no
+hype. (5) Tools teaser: two cards (RPPI, Mortgage). (6) Footer. No “Market
+Trends” entry anywhere.
+
+**Listings** — Header with result count + sort. Left = filter panel (district,
+type, tenure, price, beds/baths) collapsible; Right = **map + grid pairing**:
+desktop map-left/grid-right (50/50), two-way hover/selection sync; clustered
+district markers with counts (no geodata). Grid = listing cards, Promoted cards
+pinned to top of first page with gold treatment + “Promoted” pill. Status
+badges (Active/Pending/Sold) on every card; only publicly visible statuses
+shown. Empty state = friendly mark + “No listings match — broaden filters”.
+Pagination bottom-right. Mobile = list-first, sticky “Map” toggle, filters in a
+full-screen sheet.
+
+**Listing Detail** — (1) Gallery: large primary image + thumbnail strip
+(`/api/media`), graceful placeholder if none. (2) Header: title (Fraunces h1),
+price (Fraunces, prominent, KYD), district · type · tenure · status badge,
+reference number + “Updated {publishedAt}” (trust signals). (3) Key facts row:
+beds / baths / area (tabular). (4) Description (publicDescription). (5)
+**Tool handoff**: “Estimate mortgage” and “See 5-yr projection” buttons that
+deep-link to the tools prefilled with this listing’s price/district. (6)
+Inquiry CTA (sticky on mobile) → Inquiry sheet. (7) Disclaimer block. Never
+shows private fields (enforced by the public-safe projection + leak test).
+
+**Tools** — Index page: two large tool cards (RPPI Projection, Mortgage
+Calculator) with one-line value props. Each tool screen = left input panel /
+right result panel (mobile: stacked, result kept prominent). Detailed tool UX
+is Design Phase 8; Phase 3 only fixes their entry, layout shell, and the
+mandatory estimates-only disclaimer placement (always visible with results).
+
+**Partners** — Editorial page explaining the three partner types
+(private seller, independent broker, advertiser — mirrors `membershipType`),
+the open/no-lock-in stance, and what membership gives. Primary CTA “Apply”.
+
+**Partner Application** — Single calm multi-step form mapping to the real
+`applications` table: applicant email, requested type (`membershipType`),
+plus metadata fields (name, brokerage/firm, message) stored in
+`applications.metadata`. Steps: Type → Details → Review → Submit. Success
+screen states “Application received — you’ll be contacted”; status is tracked
+in the Admin workspace (Phase 5). No account is created at apply time.
+
+## 6. COMPONENT GUIDANCE
+Reuses Phase 2 primitives only: top nav + login dropdown, listing card,
+promoted card, filter bar, map+list pair, gallery (composite of image +
+thumb), stat-style key-facts row, multi-step form, inquiry sheet (form +
+toast), disclaimer block, footer. The **Inquiry sheet** is the one composite
+introduced here; it has a real dependency (no leads table — Phase 1 risk #8).
+
+## 7. RESPONSIVE RULES
+Home hero stays impactful at mobile (image crops to portrait safe-area, type
+steps down per Phase 2). Listings: ≥lg map+grid 50/50; md = grid + map toggle;
+<md = list-first + full-screen map + synced bottom card carousel; filters →
+full-screen sheet <md. Detail: gallery becomes swipeable, inquiry CTA sticky
+bottom bar <md. Forms single-column <md, step indicator compact.
+
+## 8. OPEN QUESTIONS / RISKS
+- **#1 map/geodata (carried, now load-bearing):** Listings is designed for
+  district-centroid clustering. If precise pins are wanted, geo columns +
+  geocoding are an engineering prerequisite. Decision needed before Listings
+  is built.
+- **#8 leads modeling (now blocking inquiry):** the Inquiry sheet and the
+  Partners/Detail CTAs need a leads/inquiries table + handler — none exists.
+  Either model leads, or route inquiries to email/`applications` interim.
+  Decision needed before inquiry ships.
+- **#2 RPPI source (affects Tools handoff):** Detail’s “5-yr projection”
+  deep-link assumes a data source; if none, that CTA is hidden until Phase 8
+  resolves the source.
+- Promoted eligibility/monetization rule still undefined (affects Listings +
+  Home featured strip ordering).
+
+## 9. STOP AND WAIT FOR APPROVAL
+Phase 3 delivered. Phase 4 (login + role entry) does not require the open data
+decisions and can proceed on approval; but **Listings and inquiry cannot be
+built** until #1 (map/geodata) and #8 (leads) get a direction.
