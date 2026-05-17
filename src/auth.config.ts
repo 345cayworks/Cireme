@@ -14,6 +14,7 @@ export const authConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.uid = user.id ?? token.sub;
         token.role = (user as { role?: Role }).role ?? "public_user";
         token.status = (user as { status?: string }).status ?? "pending";
       }
@@ -21,6 +22,7 @@ export const authConfig = {
     },
     session({ session, token }) {
       if (session.user) {
+        session.user.id = (token.uid as string) ?? (token.sub as string);
         session.user.role = (token.role as Role) ?? "public_user";
         session.user.status = (token.status as string) ?? "pending";
       }

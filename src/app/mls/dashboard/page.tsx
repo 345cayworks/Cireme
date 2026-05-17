@@ -15,9 +15,11 @@ export default async function DashboardPage() {
           Role: {session?.user?.role} · Status: {session?.user?.status}
         </p>
       </div>
-      <p className="muted" style={{ marginTop: "1.5rem" }}>
-        Operational modules (listing input, compliance, membership) arrive in
-        Phases 4–5.
+      <p style={{ marginTop: "1.5rem" }}>
+        <a href="/mls/compliance">Compliance review →</a>
+      </p>
+      <p className="muted">
+        Further operational modules (listing input, membership) follow.
       </p>
       <form
         action={async () => {
