@@ -39,6 +39,8 @@ export type PublicListing = {
   areaSqFt: number | null;
   publicDescription: string | null;
   publishedAt: Date | null;
+  latitude: string | null;
+  longitude: string | null;
 };
 
 /** Statuses the public portal is allowed to surface at all. */
@@ -67,5 +69,7 @@ export function toPublicListing(row: ListingRow): PublicListing {
     areaSqFt: row.areaSqFt,
     publicDescription: row.publicDescription,
     publishedAt: row.publishedAt,
+    latitude: row.latitude,
+    longitude: row.longitude,
   };
 }

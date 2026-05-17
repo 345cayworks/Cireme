@@ -6,6 +6,7 @@ import { listingMedia, listings } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import { isPubliclyVisible, toPublicListing } from "@/lib/public-safe";
 import { CAYMAN_DISTRICTS, DISTRICT_LABEL } from "@/data/cayman-districts";
+import PropertyMap, { type MapMarker } from "@/components/PropertyMap";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,15 @@ export default async function ListingsPage() {
     }
   }
 
+  const mapMarkers: MapMarker[] = visible
+    .filter((l) => l.latitude != null && l.longitude != null)
+    .map((l) => ({
+      id: l.id,
+      position: { lat: Number(l.latitude), lng: Number(l.longitude) },
+      title: l.title,
+      href: `/listings/${l.id}`,
+    }));
+
   return (
     <main>
       <p className="eyebrow">Cayman Islands</p>
@@ -65,6 +75,16 @@ export default async function ListingsPage() {
               </span>
             );
           })}
+        </div>
+      ) : null}
+
+      {mapMarkers.length > 0 ? (
+        <div style={{ marginTop: "1.5rem" }}>
+          <PropertyMap markers={mapMarkers} height={420} />
+          <p className="muted" style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>
+            Map pins are approximate. Use “Use my location” to centre the map
+            near you.
+          </p>
         </div>
       ) : null}
 

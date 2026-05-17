@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { listings } from "@/db/schema";
 import { isPubliclyVisible, toPublicListing } from "@/lib/public-safe";
 import { listListingMedia } from "@/lib/media-service";
+import PropertyMap from "@/components/PropertyMap";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,28 @@ export default async function ListingDetailPage({
         <h2>About this property</h2>
         <p>{listing.publicDescription ?? "No description provided."}</p>
       </section>
+
+      {listing.latitude != null && listing.longitude != null ? (
+        <section className="section">
+          <h2>Location</h2>
+          <PropertyMap
+            markers={[
+              {
+                id: listing.id,
+                position: {
+                  lat: Number(listing.latitude),
+                  lng: Number(listing.longitude),
+                },
+                title: listing.title,
+              },
+            ]}
+            height={360}
+          />
+          <p className="muted" style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>
+            Pin is approximate and for general guidance only.
+          </p>
+        </section>
+      ) : null}
 
       <div
         className="card"

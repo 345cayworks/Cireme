@@ -28,6 +28,8 @@ const FULL_ROW: ListingRow = {
   bathrooms: "2.5",
   areaSqFt: 2400,
   publicDescription: "Bright, well kept.",
+  latitude: "19.2866000",
+  longitude: "-81.3744000",
   privateRemarks: "Seller motivated.",
   agentId: "agent-1",
   officeId: "office-1",

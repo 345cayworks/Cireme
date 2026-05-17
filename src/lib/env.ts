@@ -8,6 +8,9 @@ const envSchema = z.object({
   // the request path. Strength is enforced by the script, not here.
   SUPER_ADMIN_EMAIL: z.string().email().optional(),
   SUPERADMIN_MASTER_KEY: z.string().optional(),
+  // Client-exposed (NEXT_PUBLIC_*). Optional: maps degrade to a graceful
+  // fallback when unset, so build/test do not require a key.
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
@@ -27,6 +30,8 @@ function loadEnv(): Env {
       AUTH_URL: process.env.AUTH_URL,
       SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL,
       SUPERADMIN_MASTER_KEY: process.env.SUPERADMIN_MASTER_KEY,
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:
+        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
       NODE_ENV: process.env.NODE_ENV,
     });
   }

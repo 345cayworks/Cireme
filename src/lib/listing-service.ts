@@ -68,6 +68,8 @@ type NewListingInput = {
   bedrooms?: number | null;
   bathrooms?: string | null;
   areaSqFt?: number | null;
+  latitude?: string | null;
+  longitude?: string | null;
 };
 
 /** Creates a listing in `draft` and records the creation in the audit log. */
@@ -93,6 +95,8 @@ export async function createListing(input: NewListingInput) {
         bedrooms: input.bedrooms ?? null,
         bathrooms: input.bathrooms ?? null,
         areaSqFt: input.areaSqFt ?? null,
+        latitude: input.latitude ?? null,
+        longitude: input.longitude ?? null,
       })
       .returning();
 

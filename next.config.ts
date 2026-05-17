@@ -7,9 +7,13 @@ const CSP = [
   "frame-ancestors 'none'",
   "img-src 'self' data: blob: https:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self'",
-  "font-src 'self' data:",
+  // Google Maps JS API: governance override of Phase 1 non-negotiable #6 and
+  // the original Risk #1 resolution (recorded in governance/CIREME_Design_Plan.md).
+  // Scoped to Google Maps hosts only; no other third-party origins allowed.
+  "script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://maps.gstatic.com",
+  "connect-src 'self' https://maps.googleapis.com https://maps.gstatic.com",
+  "worker-src 'self' blob:",
+  "font-src 'self' data: https://fonts.gstatic.com",
   "form-action 'self'",
 ].join("; ");
 

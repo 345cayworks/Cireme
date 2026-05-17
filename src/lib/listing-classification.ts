@@ -32,6 +32,10 @@ export const LISTING_FIELD_CLASSIFICATION = {
   areaSqFt: "public",
   publicDescription: "public",
   publishedAt: "public",
+  // Coarse pin shown on the public map; deliberately not survey-accurate and
+  // never a substitute for the (private) Block & Parcel.
+  latitude: "public",
+  longitude: "public",
   // Precise legal parcel identifiers can re-identify an owner — member-only.
   landBlock: "private",
   landParcel: "private",

@@ -40,6 +40,8 @@ const createSchema = z.object({
   landBlock: z.string().trim().max(50).optional(),
   landParcel: z.string().trim().max(50).optional(),
   publicDescription: z.string().trim().max(4000).optional(),
+  latitude: z.coerce.number().min(-90).max(90).optional(),
+  longitude: z.coerce.number().min(-180).max(180).optional(),
 });
 
 const transitionSchema = z.object({
@@ -89,14 +91,19 @@ export async function createListingAction(formData: FormData) {
     landBlock: formData.get("landBlock") || undefined,
     landParcel: formData.get("landParcel") || undefined,
     publicDescription: formData.get("publicDescription") || undefined,
+    latitude: formData.get("latitude") || undefined,
+    longitude: formData.get("longitude") || undefined,
   });
   if (!parsed.success) return;
 
+  const { latitude, longitude, ...rest } = parsed.data;
   await createListing({
-    ...parsed.data,
+    ...rest,
     agentId: user.id,
     officeId: null,
-    priceKyd: parsed.data.priceKyd ?? null,
+    priceKyd: rest.priceKyd ?? null,
+    latitude: latitude != null ? String(latitude) : null,
+    longitude: longitude != null ? String(longitude) : null,
   });
   revalidatePath("/mls/listings");
 }

@@ -28,6 +28,8 @@ function listingFixture(over: Partial<ListingRow> = {}): ListingRow {
     bathrooms: "2.5",
     areaSqFt: 2400,
     publicDescription: "Bright, well kept.",
+    latitude: null,
+    longitude: null,
     privateRemarks: null,
     agentId: null,
     officeId: null,

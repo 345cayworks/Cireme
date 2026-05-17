@@ -194,6 +194,11 @@ export const listings = pgTable("listings", {
   landParcel: text("land_parcel"),
   priceKyd: numeric("price_kyd", { precision: 14, scale: 2 }),
   soldPriceKyd: numeric("sold_price_kyd", { precision: 14, scale: 2 }),
+  // Precise pin (WGS84). Optional: a listing may have only a district until
+  // the agent drops a pin. Public — surfaced on the map (governance override
+  // of Risk #1 / Phase 1 non-negotiable #6, recorded in the design plan).
+  latitude: numeric("latitude", { precision: 10, scale: 7 }),
+  longitude: numeric("longitude", { precision: 10, scale: 7 }),
   bedrooms: integer("bedrooms"),
   bathrooms: numeric("bathrooms", { precision: 4, scale: 1 }),
   areaSqFt: integer("area_sq_ft"),

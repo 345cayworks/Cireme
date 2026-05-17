@@ -811,12 +811,30 @@ since it changes the Applications screen's success path.
 
 # OPEN-QUESTION RESOLUTIONS (implementation log)
 
-- **Risk #1 — map/geodata: RESOLVED.** Decision: *district markers now,
-  upgrade-ready*. No per-listing coordinates added; `src/data/cayman-districts.ts`
-  holds approximate district centroids + labels and is the stable contract a
-  future precise-pin upgrade can swap into without API changes. Listings shows
-  a district summary (counts) and district labels; a tile-based slippy map was
-  deliberately avoided to preserve the deployed CSP (no external tile hosts).
+- **Risk #1 — map/geodata: RESOLVED, then SUPERSEDED (see override below).**
+  Original decision: *district markers now, upgrade-ready*. No per-listing
+  coordinates; `src/data/cayman-districts.ts` held approximate district
+  centroids as the stable contract for a future precise-pin upgrade; a
+  tile-based slippy map was deliberately avoided to preserve the deployed CSP.
+- **OVERRIDE — precise pins + Google Maps (supersedes Risk #1 resolution and
+  Phase 1 non-negotiable #6 "must not loosen the CSP"). Decision approved by
+  the product owner.** Per-listing `latitude`/`longitude` columns added
+  (`numeric(10,7)`, nullable, migration `drizzle/0001`); classified **public**
+  in `listing-classification.ts` and projected by `toPublicListing` (the
+  governance gate tests were updated in lockstep). Agents drop a pin in the
+  listing create form (drag/click/"use my location"); the public Listings and
+  Listing Detail pages render Google Maps markers with a visitor "use my
+  location" control. **CSP deliberately loosened** in `next.config.ts`, scoped
+  to Google Maps origins only: `script-src`/`connect-src` +
+  `https://maps.googleapis.com https://maps.gstatic.com`,
+  `worker-src 'self' blob:`, `font-src` + `https://fonts.gstatic.com`. No
+  other third-party origin is permitted. Requires
+  `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional in `env.ts`; maps degrade to a
+  graceful keyless fallback — manual lat/lng entry for agents, a notice for
+  visitors — so build/test never require a key). Privacy/security note:
+  coordinates are intentionally coarse, surfaced as "approximate", and never
+  a substitute for the (still-private) Block & Parcel; the district-centroid
+  contract is retained for listings without a pin.
 - **Risk #2 — RPPI source: RESOLVED.** Official Cayman Government RPPI ingested
   (`src/data/rppi.ts`); projection tool ships with the approved low–mid–high
   band and mandated estimates-only disclaimer.

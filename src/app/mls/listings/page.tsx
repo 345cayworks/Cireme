@@ -13,6 +13,7 @@ import {
   transitionAction,
   uploadMediaAction,
 } from "./actions";
+import PropertyMap from "@/components/PropertyMap";
 
 export const dynamic = "force-dynamic";
 
@@ -147,6 +148,19 @@ export default async function ListingsAdminPage() {
             Public description
             <input name="publicDescription" />
           </label>
+          <div style={{ marginTop: "0.75rem" }}>
+            <span style={{ display: "block", fontWeight: 600 }}>
+              Location pin (optional)
+            </span>
+            <span
+              className="muted"
+              style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.5rem" }}
+            >
+              Drop a pin on the property, or use your current location. Coarse
+              location only — never a substitute for Block &amp; Parcel.
+            </span>
+            <PropertyMap editable height={300} />
+          </div>
           <button type="submit" style={{ marginTop: "0.5rem" }}>
             Create draft
           </button>
