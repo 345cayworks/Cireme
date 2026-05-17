@@ -15,8 +15,8 @@ approved here.
 
 | Design phase | Scope | Status |
 |---|---|---|
-| 1 | Visual strategy + UX foundation | **Delivered — awaiting approval** |
-| 2 | Design system foundation | Pending P1 approval |
+| 1 | Visual strategy + UX foundation | **Approved** |
+| 2 | Design system foundation | **Delivered — awaiting approval** |
 | 3 | Public experience design | Pending |
 | 4 | Login + role entry | Pending |
 | 5 | Admin experience | Pending |
@@ -230,3 +230,177 @@ Phase 1 is delivered. I will not start Phase 2 (design system foundation)
 until these decisions are approved and the high-risk open questions
 (especially map/geodata, RPPI source, and leads modeling) are directionally
 answered.
+
+---
+
+# DESIGN PHASE 2 — DESIGN SYSTEM FOUNDATION
+
+## 1. PHASE SUMMARY
+Defines the concrete visual language: color tokens, typography system + scale,
+spacing, radii, elevation, and the behavior rules for buttons, forms, cards,
+tables, feedback, and the map. Tokens are named so engineering can implement
+them as CSS variables. Values are real decisions, not placeholders.
+
+## 2. EXPERIENCE GOALS
+- A single token set that expresses **light editorial public** and **dark-frame
+  / light-data workspace** without two separate systems.
+- Gold is reserved and accessible: accent + fills only, never body text.
+- Self-hosted fonts so the existing CSP (`font-src 'self' data:`) is respected
+  — no third-party font CDN.
+
+## 3. VISUAL DIRECTION — TOKENS
+
+### Color
+Brand & surface:
+| Token | Hex | Use |
+|---|---|---|
+| `--ink` | `#0E0F12` | Public primary text; deepest surface |
+| `--obsidian-900` | `#16181D` | Workspace app frame base |
+| `--obsidian-800` | `#1B1E24` | Workspace raised frame (rail, bars) |
+| `--gold` | `#C8A24A` | Accent: primary buttons, key metrics, brand |
+| `--gold-hover` | `#B68F3C` | Gold interactive hover/active |
+| `--gold-soft` | `#F4ECD8` | Gold tint: badges, highlight backgrounds |
+| `--canvas` | `#F7F5F1` | Public warm off-white page background |
+| `--surface` | `#FFFFFF` | Content/data cards (public + workspace) |
+
+Neutral ramp: `--n-900 #14161A` · `800 #232730` · `700 #3A3F4A` ·
+`600 #5A616E` · `500 #7C8492` · `400 #A2A9B4` · `300 #C9CED6` ·
+`200 #E4E7EC` · `100 #F1F2F5` · `050 #F7F5F1`.
+
+Text: light surfaces — primary `--n-900`, secondary `--n-600`, meta `--n-500`,
+on-gold `--ink`. Dark frame — primary `#F5F6F8`, secondary `--n-400`.
+
+Semantic (never gold; gold stays brand-only):
+| Token | Hex | Soft bg |
+|---|---|---|
+| success | `#2E7D5B` | `#E3F2EC` |
+| warning | `#C2701C` | `#FBEEDD` |
+| error | `#B23B3B` | `#F7E4E4` |
+| info | `#2F6F9F` | `#E4EEF5` |
+
+**Accessibility rule:** `--gold` on white ≈ 2.1:1 → **fails as text**. Gold is
+permitted only as a fill (with `--ink` text, ≥ 8:1) or as a non-text accent
+(borders, ≤ icons, large brand display ≥ 24px bold). Body/meta text never gold.
+
+### Typography
+Self-hosted, SIL OFL (free, commercial-ok):
+- **Display / editorial — “Fraunces” (variable).** Public hero, large section
+  headers, listing price hero, wordmark. Optical sizing = editorial luxury.
+- **UI / data — “Inter” (variable).** All workspace UI, body copy everywhere,
+  tables, forms; uses `tabular-nums` for figures/money.
+- **Mono — “IBM Plex Mono.”** Only references, API keys, audit/IDs.
+
+Scale (token · font · px / line-height / weight / tracking):
+| Token | Font | px | LH | Wt |
+|---|---|---|---|---|
+| display-xl | Fraunces | 64 | 1.05 | 600 |
+| display-l | Fraunces | 48 | 1.10 | 600 |
+| h1 | Fraunces | 36 | 1.15 | 600 |
+| h2 | Fraunces | 28 | 1.20 | 600 |
+| h3 | Inter | 22 | 1.25 | 600 |
+| h4 | Inter | 18 | 1.30 | 600 |
+| body-l | Inter | 17 | 1.55 | 400 |
+| body-m | Inter | 15 | 1.55 | 400 |
+| body-s | Inter | 13.5 | 1.5 | 400 |
+| label | Inter | 13 | 1.2 | 600 |
+| meta | Inter | 12 | 1.3 | 500 |
+| mono | IBM Plex Mono | 13 | 1.4 | 400 |
+Public uses Fraunces display→h2; workspace stays Inter h3 and below for density.
+
+### Spacing — 4px base
+`0 2 4 8 12 16 20 24 32 40 48 64 80 96 128`. Public content max-width 1280,
+gutter 24 (mobile) → 80 (xl); hero full-bleed. Workspace: rail 264px
+(collapsed 72), content gutter 24, card padding 24, section gap 32–48,
+12-col grid, 24 gutter.
+
+### Radius & elevation
+Radii: `sm 6` (inputs, chips) · `md 10` (buttons, cards) · `lg 16` (modals,
+feature cards) · `pill 999` (badges/filters). Tables use 0 radius rules.
+Elevation (light surfaces only): `e1` 0 1 2 rgba(20,22,26,.06);
+`e2` 0 4 12 rgba(20,22,26,.08); `e3` 0 12 28 rgba(20,22,26,.12). Dark frame
+uses 1px `rgba(255,255,255,.08)` borders + tint layering, not shadow.
+
+## 4. UX / COMPONENT BEHAVIOR RULES
+
+**Buttons** — variants: primary (gold fill, ink text), secondary (n-900 fill
+on light / n-200 on dark contexts), outline (1px n-300, n-900 text), ghost
+(transparent, n-700 text), destructive (error fill), quiet/link (gold-hover
+underline). Sizes sm 36 / md 44 / lg 52, radius md. States: hover (−8% lum),
+active (−14%), focus (2px gold ring, 2px offset, always visible), disabled
+(40% opacity, no pointer), loading (inline spinner, label retained, button
+width locked).
+
+**Forms** — label above field (label token), input md 44 / sm 36, radius sm,
+1px n-300 border, `--surface` bg. Focus = 2px gold ring. Error = error border
++ error-soft fill + message with icon below. Required = `*` in n-500. Helper
+text meta token. Validate on blur, re-validate on change after first error,
+full check on submit; scroll to first error. Success = field check + toast.
+Disabled/readonly visually distinct (n-100 fill). Components: text, textarea
+(auto-grow cap), select (custom, keyboard + type-ahead), combobox, date,
+file/media dropzone (drag + click, thumbnail list, progress, remove), CSV
+import (dropzone → column-map preview table → validation summary → confirm).
+
+**Cards** — *Listing*: 4:3 image, status badge top-left, price (Fraunces h3)
++ district/type/tenure meta, hover `e2` + 2px translate (light only). *Promoted*:
+1px gold border + “Promoted” gold-soft pill, `e2` resting. *Stat*: label
+(meta) + value (Inter 28 tabular) + delta (success/error) + sparkline slot.
+*Dashboard*: header (h4 + optional action) / divider / content, padding 24,
+radius md, `e1`. *Detail*: sectioned, hairline dividers, no nested shadows.
+
+**Tables / grid** — desktop: header sticky, row 52, hairline `--n-200`
+dividers, numerics right-aligned tabular, row hover `--n-050`, single row
+action as right-aligned `⋯` menu, multi-select checkbox col when bulk actions
+exist. Controls region above table: search + filters left, column/sort +
+pagination right. Sort = caret in header label. Mobile (< md): each row → card
+with 3–4 key fields + primary action button; rest behind “Details” expand.
+
+**Feedback** — skeletons mirror final layout (no spinners for page loads);
+buttons use inline spinner. Empty state = mark/icon + one-line explanation +
+primary action. Error block = title + cause + Retry. Toasts top-right
+(desktop) / top (mobile), auto-dismiss 4s, success/error/info only (never
+gold), max 3 stacked. Destructive actions (remove listing, suspend/terminate
+account) require a modal confirm; account termination requires typed
+confirmation. Optimistic UI only where reversible; otherwise pending state.
+
+**Map UX** — default works **without precise coordinates** (Phase 1 risk #1):
+district-centroid clustered markers with count bubbles; standard pin = neutral,
+promoted = gold pin. Desktop = map left / list right, selecting a card focuses
++ enlarges its marker and vice-versa. Tablet = map/list toggle. Mobile =
+list-first, full-screen map toggle, swipeable bottom card carousel synced to
+markers. Markers are minimal geometric brand shapes, no default provider pins.
+Upgrades cleanly to precise points if geodata is later added.
+
+## 5. PAGE / SCREEN IMPLICATIONS
+Tokens + components above are sufficient to build: public nav/login dropdown,
+listing grid + promoted slots, listing detail, tool panels, workspace rail +
+context bar, all dashboards, management tables, the listing create/edit form,
+media + CSV flows, and feedback states — i.e., everything in Design Phases
+3–8. MLS Phase 9 reuses table/card/feedback tokens unchanged.
+
+## 6. COMPONENT GUIDANCE
+Component inventory is now token-complete. Phase 3+ will apply (not redefine)
+these to specific screens. No new primitives expected before Phase 9, which
+adds only composite views (audit panel, lifecycle timeline, compliance table)
+from existing primitives.
+
+## 7. RESPONSIVE RULES
+Breakpoints: `xs <480 · sm 480 · md 768 · lg 1024 · xl 1280 · 2xl 1536`.
+Public content max 1280 (hero full-bleed); workspace fluid beside rail.
+Display scale steps down one stop below md (display-xl→h1, h1→h2). Touch
+targets ≥ 44px. Rail: icons-only at md, drawer at < md. Tables → cards < md.
+
+## 8. OPEN QUESTIONS / RISKS
+Carried from Phase 1, still unanswered (do not block Phase 2; block 3/8):
+map/geodata (#1), RPPI source (#2), leads modeling (#8). New in Phase 2:
+- **Font hosting (resolved-as-decision):** fonts MUST be self-hosted + subset
+  + `preload`; using Google Fonts CDN would violate the deployed CSP. Flagged
+  so engineering self-hosts under `/public` and `font-src 'self'` stays.
+- **Dark workspace confirm:** dark frame + light data cards chosen; confirm vs
+  fully light workspace (accessibility/long sessions). Reversible via tokens.
+- **Fraunces on data screens:** intentionally excluded below h2 in workspace
+  for density; confirm acceptable.
+
+## 9. STOP AND WAIT FOR APPROVAL
+Phase 2 delivered. Phase 3 (public experience design) will not start until
+this system is approved and, ideally, Phase 1 risk #1 (map/geodata) has a
+direction since it shapes the Listings page.
