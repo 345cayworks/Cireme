@@ -4,7 +4,20 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { RPPI_DISCLAIMER, RPPI_SOURCE, type RppiRegion } from "@/data/rppi";
+import { LAS_ANNUAL, LAS_CAVEAT, LAS_SOURCE } from "@/data/las";
 import { projectBand } from "@/lib/rppi-projection";
+
+// Drop the most recent year if it looks like a partial (year-to-date) figure
+// — far fewer transfers than the prior-year run-rate — so the trend is honest.
+const lasComplete = (() => {
+  const a = [...LAS_ANNUAL];
+  const last = a[a.length - 1];
+  const prev = a[a.length - 2];
+  if (last && prev && last.freeholdTransfers < prev.freeholdTransfers * 0.5) {
+    a.pop();
+  }
+  return a.slice(-6);
+})();
 
 const REGIONS: { value: RppiRegion; label: string }[] = [
   { value: "total", label: "Total Cayman Islands" },
@@ -156,6 +169,53 @@ export default function RppiPage() {
           </table>
         </div>
       </div>
+
+      <section className="section">
+        <p className="eyebrow">Market activity</p>
+        <h2>Cayman transaction volume</h2>
+        <p className="muted" style={{ maxWidth: "60ch" }}>
+          Freehold transfer activity across the Cayman Islands — a measure of
+          how busy the market is, alongside the price trend above.
+        </p>
+        <div className="card" style={{ marginTop: "1rem" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "0.9rem",
+            }}
+          >
+            <thead>
+              <tr style={{ textAlign: "right", color: "var(--meta)" }}>
+                <th style={{ textAlign: "left", padding: "0.4rem 0" }}>
+                  Year
+                </th>
+                <th>Freehold transfers</th>
+                <th>Total consideration (CI$)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lasComplete.map((r) => (
+                <tr
+                  key={r.year}
+                  style={{ borderTop: "1px solid var(--n-200)" }}
+                >
+                  <td style={{ padding: "0.45rem 0" }}>{r.year}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {r.freeholdTransfers.toLocaleString()}
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    {Math.round(r.freeholdConsideration).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="disclaimer" style={{ marginTop: "1rem" }}>
+          {LAS_CAVEAT} Source: {LAS_SOURCE}.
+        </p>
+      </section>
 
       <p className="disclaimer" style={{ marginTop: "1.5rem" }}>
         {RPPI_DISCLAIMER} Source: {RPPI_SOURCE}.
