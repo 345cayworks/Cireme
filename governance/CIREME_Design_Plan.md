@@ -828,7 +828,11 @@ since it changes the Applications screen's success path.
   to Google Maps origins only: `script-src`/`connect-src` +
   `https://maps.googleapis.com https://maps.gstatic.com`,
   `worker-src 'self' blob:`, `font-src` + `https://fonts.gstatic.com`. No
-  other third-party origin is permitted. Requires
+  other third-party origin is permitted. `Permissions-Policy` also relaxed
+  from `geolocation=()` to `geolocation=(self)` (both `next.config.ts` and
+  `netlify.toml`) so the same-origin "use my location" control works; camera,
+  microphone and browsing-topics remain fully disabled. Migrations apply
+  automatically on deploy — `netlify.toml` already runs `npm run db:migrate`. Requires
   `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional in `env.ts`; maps degrade to a
   graceful keyless fallback — manual lat/lng entry for agents, a notice for
   visitors — so build/test never require a key). Privacy/security note:
