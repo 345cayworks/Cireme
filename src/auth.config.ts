@@ -7,6 +7,9 @@ import { isMlsRole, type Role } from "@/lib/rbac";
  * and the full server config in auth.ts.
  */
 export const authConfig = {
+  // Netlify terminates TLS at its proxy; Auth.js v5 otherwise rejects the
+  // forwarded host as untrusted and fails every sign-in/callback.
+  trustHost: true,
   pages: {
     signIn: "/mls/login",
   },

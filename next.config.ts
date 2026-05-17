@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   typedRoutes: true,
+  // Keep `ws` (used by the Neon serverless Pool) out of the server bundle;
+  // bundling breaks its buffer-mask resolution -> "b.mask is not a function".
+  serverExternalPackages: ["ws"],
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
