@@ -252,6 +252,17 @@ button:focus-visible,
 .nav-menu__panel a:hover {
   background: var(--n-050);
 }
+.nav-menu__panel {
+  min-width: 240px;
+}
+.nav-menu__panel a strong {
+  display: block;
+  font-weight: 600;
+}
+.nav-menu__panel a .muted {
+  display: block;
+  font-size: 0.82rem;
+}
 
 .site-footer {
   border-top: 1px solid var(--n-200);

@@ -13,11 +13,20 @@ export function SiteNav() {
         <Link href={"/tools" as Route}>Tools</Link>
         <Link href={"/partners" as Route}>Partners</Link>
         <details className="nav-menu">
-          <summary>Login</summary>
-          <div className="nav-menu__panel">
-            <a href="/mls/login?as=admin">Admin Login</a>
-            <a href="/mls/login?as=broker">Broker Login</a>
-            <a href="/mls/login?as=agent">Agent Login</a>
+          <summary aria-label="Login menu">Login</summary>
+          <div className="nav-menu__panel" role="menu">
+            <a href="/mls/login?as=admin" role="menuitem">
+              <strong>Admin</strong>
+              <span className="muted">Approvals, members, oversight</span>
+            </a>
+            <a href="/mls/login?as=broker" role="menuitem">
+              <strong>Broker</strong>
+              <span className="muted">Your team and group listings</span>
+            </a>
+            <a href="/mls/login?as=agent" role="menuitem">
+              <strong>Agent</strong>
+              <span className="muted">Your listings and media</span>
+            </a>
           </div>
         </details>
       </div>

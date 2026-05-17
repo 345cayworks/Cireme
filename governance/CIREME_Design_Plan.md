@@ -18,7 +18,7 @@ approved here.
 | 1 | Visual strategy + UX foundation | **Approved** |
 | 2 | Design system foundation | **Approved** |
 | 3 | Public experience design | **Approved** |
-| 4 | Login + role entry | **Delivered — awaiting approval** |
+| 4 | Login + role entry | **Approved — implemented to spec** |
 | 5 | Admin experience | Pending |
 | 6 | Broker experience | Pending |
 | 7 | Agent experience | Pending |
@@ -639,3 +639,16 @@ independent of the open data questions, though the Admin "Leads" and
   RPPI price index (per-region growth) with transaction volume/mix, with all
   provider caveats surfaced. No new top-nav item (respects the
   no-"Market Trends"-nav decision); reached via Tools.
+- **Phase 4 — login: APPROVED & IMPLEMENTED.** `/mls/login` rebuilt to spec:
+  centered `--surface` card on `--canvas`, display-serif role-aware title and
+  eyebrow derived from the cosmetic `as` hint (admin/broker/agent; never
+  trusted for authorization — real role still drives redirect), show/hide
+  password, submit loading/disabled state, security-safe generic error
+  ("Email or password is incorrect, or the account isn't active yet."), an
+  honest "Trouble signing in?" disclosure (no self-serve reset — admin
+  restores access; pending applications explained), and a back-to-CIREME
+  link. The `as` hint is preserved across the error redirect. Nav Login
+  dropdown gained per-role one-line descriptors and menu roles. Open risks
+  carried unchanged: no email-based password reset, no rate limiting/lockout,
+  MFA out of scope (engineering dependencies, not designed-as-if-existing).
+  Phase 5 (Admin experience) is now unblocked.
