@@ -8,15 +8,22 @@
  * so a leak fails CI rather than reaching production.
  */
 import type { listings } from "@/db/schema";
+import {
+  INTERNAL_LISTING_FIELDS,
+  PRIVATE_LISTING_FIELDS as PRIVATE_FROM_CLASSIFICATION,
+} from "./listing-classification.ts";
 
 type ListingRow = typeof listings.$inferSelect;
 
-/** Fields that must never appear in any public response. */
-export const PRIVATE_LISTING_FIELDS = [
-  "privateRemarks",
-  "agentId",
-  "soldPriceKyd",
-] as const satisfies readonly (keyof ListingRow)[];
+/**
+ * Fields that must never appear in any public response. Derived from the
+ * single classification source of truth (private + internal), so this cannot
+ * silently diverge from the governance classification.
+ */
+export const PRIVATE_LISTING_FIELDS: readonly (keyof ListingRow)[] = [
+  ...PRIVATE_FROM_CLASSIFICATION,
+  ...INTERNAL_LISTING_FIELDS,
+];
 
 export type PublicListing = {
   id: string;
