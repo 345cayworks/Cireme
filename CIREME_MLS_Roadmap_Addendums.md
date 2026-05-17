@@ -18,31 +18,57 @@ The original roadmap is a generic US/NAR-style MLS template. In the Cayman
 market that template is not just incomplete, it is strategically wrong on the
 single most important question: **CIREME is not entering an empty market.**
 
-### A.1 Competitive reality: CIREBA
+### A.1 Competitive reality: CIREBA — DECISION LOCKED
 
-The Cayman Islands Real Estate Brokers Association (CIREBA) already operates the
-de-facto national MLS, used by the large majority of active brokerages. The
-original roadmap never mentions it. This is the central strategic risk and must
-be answered before any code is written.
+The Cayman Islands Real Estate Brokers Association (CIREBA) operates the
+de-facto national MLS, used by the large majority of active brokerages, and
+enforces a cooperation/compensation model on its members. The original roadmap
+never mentioned it.
 
-**Decision required (pick one explicitly):**
+**Phase 0 decision (locked):** CIREME is **Complement + Niche** (a hybrid of
+Strategies B and C below). It does **not** compete with CIREBA head-on and does
+**not** replicate CIREBA's locked-in compensation model.
 
-| Strategy | Description | Implication for roadmap |
-|---|---|---|
-| **A. Compete** | CIREME becomes an independent MLS rivaling CIREBA | Requires a membership/adoption strategy and a moat (see A.2). Highest risk. |
-| **B. Complement** | CIREME is a technology/portal layer; listings sync from/to CIREBA | Workstreams 11–12 become primary, not deferred. Lower risk, lower control. |
-| **C. Niche** | CIREME serves non-CIREBA brokers, FSBO, advertisers, or a vertical | Governance and compliance scope shrinks; growth ceiling lower. |
+| Strategy | Status |
+|---|---|
+| A. Compete with CIREBA as a rival MLS | **Rejected** — out of scope |
+| **B. Complement** — interoperate; do not depend on CIREBA membership | **Adopted** |
+| **C. Niche** — serve private sellers (FSBO) and independent / non-CIREBA brokers | **Adopted** |
 
-No technical workstream should start until ownership selects A, B, or C. Every
-downstream estimate in Addendum B assumes a choice has been made.
+**Product thesis (the locked positioning):** CIREME is the open marketplace for
+**private sellers and independent brokers to list, share, and sell without a
+mandatory cooperation/compensation lock-in.** The compensation model is not a
+deferred feature — it is a deliberate product *non-goal* and a differentiator.
 
-### A.2 Adoption moat (only required if Strategy A)
+Consequences that ripple through every later phase:
 
-If competing, the roadmap must add a workstream the original omitted entirely —
-**why a broker switches.** Candidate moats: superior listing input UX, real
-compliance/accuracy guarantees, public-portal lead volume, lower cost, better
-data exports. This belongs in Phase 1 governance as a written value proposition,
-not as a feature.
+- CIREBA is treated as an adjacent ecosystem, **not** a competitor or a
+  dependency. No CIREBA membership, data feed, or sync is required to operate.
+  Optional one-way interoperability (Addendum C.2 RESO export) is a *later*
+  convenience, not a blocker.
+- Compliance/enforcement scope **shrinks materially** (see A.3, B.1 Phase 5):
+  CIREME has no licensed-broker association mandate and does not want one.
+  Enforcement is light-touch contractual (accuracy + acceptable-use), not
+  professional-conduct adjudication.
+- The compensation/cooperation sub-phase is **deleted, not gated** (see A.5,
+  B.1 — former Phase 6b is removed).
+- The growth ceiling is lower than a national MLS but the regulatory and legal
+  surface is far smaller, which is consistent with a small team.
+
+### A.2 Niche value proposition (replaces "adoption moat")
+
+Because CIREME is not competing with CIREBA, the question is not "why does a
+broker switch" but **"why does an independent seller or broker list here at
+all."** The moat is the positioning itself:
+
+- No mandatory buyer-broker compensation; sellers set their own terms or none.
+- Open to FSBO and independent/non-CIREBA brokers who are excluded from or
+  unwilling to join the CIREBA MLS.
+- Low friction listing input + public-portal lead volume.
+- Transparent, no compensation-lock marketplace as the brand.
+
+This belongs in Phase 1 governance as a one-page written positioning statement
+and as the public portal's primary marketing message.
 
 ### A.3 Legal and regulatory grounding
 
@@ -59,6 +85,11 @@ list. Replace its contents with Cayman-specific obligations:
   agreement. The enforcement model must be re-framed as *contractual sanction
   (suspension of access)*, not regulatory penalty. This changes the compliance
   data model: violations attach to a membership contract, not a license.
+  Under the locked Phase 0 niche positioning (A.1) this is scoped down further:
+  enforcement covers **listing accuracy and acceptable-use only** (stale/sold
+  listings, duplicates, misleading media, missing required fields) — **not**
+  professional-conduct adjudication or compensation policing. CIREME is a
+  marketplace operator, not a self-regulatory body.
 - **Property transfer context.** Stamp duty (one-time, on transfer) and the
   absence of annual property tax shape what "sold" and valuation fields should
   capture; no recurring-tax fields are needed, unlike US templates.
@@ -85,14 +116,25 @@ These changes ripple into Workstream 7 (standardized data model) and Workstream
 4 (mandatory fields by property type) and must be reflected in the Phase 3 data
 model refactor.
 
-### A.5 Cooperation/compensation caution
+### A.5 Cooperation/compensation: REMOVED by Phase 0 decision
 
 The original roadmap imports "cooperation/compensation fields" (Workstream 6)
-from the US model uncritically. Buyer-broker compensation display is the most
-legally volatile area in the industry post-NAR settlement. **Recommendation:**
-ship the cooperation *visibility/contact-routing* model in Phase 6, but treat
-**compensation fields as a separate, legally-gated sub-phase** that does not
-block Phase 6, and is signed off by counsel and CIREBA-strategy decision (A.1).
+from the US model uncritically. Given the locked Phase 0 positioning (A.1),
+this is no longer a legally-gated sub-phase — it is **out of scope entirely.**
+
+- **No buyer-broker compensation fields** in the data model or UI. Absence of
+  the lock-in is the product, so building the field set would contradict the
+  positioning and re-introduce the legal volatility CIREME is avoiding.
+- Workstream 6 is **retained only for its non-compensation parts**: listing
+  brokerage/agent identification, contact routing, public vs. private remarks,
+  member-only fields. The "internal compensation/cooperation fields" bullet is
+  struck.
+- Former **Phase 6b is deleted** from the plan (see B.1). No counsel gate is
+  needed because the field set does not exist.
+- A seller *may* free-text any terms they wish in the public description; the
+  platform takes no structured position on compensation and displays no
+  cooperation-fee field. This stance should be stated in the membership
+  agreement and acceptable-use policy (A.3 / Phase 1).
 
 ---
 
@@ -107,22 +149,27 @@ product/governance lead) and **Strategy A.1 decided**; adjust proportionally.
 
 | Phase | Name | Est. duration | Effort (eng-wks) | Owner | Hard gate to next? |
 |---|---|---|---|---|---|
-| 0 | **Strategy decision (A.1) + counsel review (A.3)** | 2–3 wks | n/a (lead + counsel) | Product/Founder | **Yes** |
-| 1 | Governance & MLS design | 3–4 wks | 2 | Product/Governance | Yes |
-| 2 | Broker & office layer | 4–6 wks | 8–10 | Eng | Yes |
-| 3 | MLS data model refactor (incl. A.4) | 4–5 wks | 8 | Eng | Yes |
+| 0 | **Strategy decision — LOCKED: Complement + Niche (A.1)** | done | n/a | Product/Founder | **Closed** |
+| 0b | Counsel review (DPA, membership terms, no-compensation stance) | 1–2 wks | n/a (lead + counsel) | Product/Founder | **Yes** |
+| 1 | Governance & MLS design (incl. positioning statement A.2) | 3–4 wks | 2 | Product/Governance | Yes |
+| 2 | Broker/seller & account layer | 3–5 wks | 6–8 | Eng | Yes |
+| 3 | MLS data model refactor (incl. A.4, **no compensation fields**) | 4–5 wks | 7 | Eng | Yes |
 | 4 | Listing lifecycle engine | 5–7 wks | 10–12 | Eng | Yes |
-| 5 | Compliance system (contractual model A.3) | 4–6 wks | 8–10 | Eng | Soft |
-| 6 | Cooperation & member-only data | 4–5 wks | 8 | Eng | Soft |
-| 6b | Compensation fields (legally gated) | gated | 2 | Eng + Counsel | No (parallel) |
+| 5 | Compliance system (light-touch accuracy/AUP only — A.3) | 3–4 wks | 5–6 | Eng | Soft |
+| 6 | Cooperation & member-only data (**compensation removed — A.5**) | 3–4 wks | 6 | Eng | Soft |
 | 7 | Public portal synchronization | 3–4 wks | 6 | Eng | Soft |
-| 8 | MLS search & analytics | 4–5 wks | 8 | Eng | No |
-| 9 | API & RESO alignment (Addendum C) | 4–6 wks | 8–10 | Eng | No |
+| 8 | Search & market analytics | 4–5 wks | 8 | Eng | No |
+| 9 | API & RESO export (one-way, optional CIREBA interop) | 4–6 wks | 8–10 | Eng | No |
 | 10 | Launch readiness | 3–4 wks | 6 | All | Yes |
 
-Indicative critical path (Strategy A): **0 → 1 → 2 → 3 → 4 → 5 → 7 → 10**,
-≈8–11 months elapsed for a small team. Phases 6, 8, 9 run in parallel off the
-critical path. These are planning estimates for sequencing, not commitments.
+Former **Phase 6b (compensation fields) is deleted** per A.5. Phase 2 and 5
+shrink because the niche positioning removes brokerage-hierarchy depth and
+professional-conduct enforcement.
+
+Indicative critical path: **0b → 1 → 2 → 3 → 4 → 5 → 7 → 10**, ≈6–9 months
+elapsed for a small team (reduced from the original ~8–11 by the niche scope
+cuts). Phases 6, 8, 9 run in parallel off the critical path. These are planning
+estimates for sequencing, not commitments.
 
 ### B.2 Re-prioritization (replaces "everything is Critical")
 
@@ -212,11 +259,11 @@ the public projection.
 
 | Original gap | Addendum fix |
 |---|---|
-| No Cayman/CIREBA strategy | A.1 mandatory Phase 0 decision; A.2 moat |
-| Generic legal section | A.3 DPA, contractual (not regulatory) enforcement, counsel gate |
+| No Cayman/CIREBA strategy | A.1 **LOCKED: Complement + Niche**; A.2 niche positioning |
+| Generic legal section | A.3 DPA, light-touch contractual enforcement, counsel gate |
 | US-style schema | A.4 Block & Parcel, tenure, district enum, KYD |
-| Compensation imported blindly | A.5 legally-gated parallel sub-phase 6b |
-| No time/effort/owners | B.1 sized phase plan + critical path |
+| Compensation imported blindly | A.5 **removed entirely** — anti-lock-in is the product |
+| No time/effort/owners | B.1 sized phase plan + critical path (~6–9 mo, niche-scoped) |
 | "Everything Critical" | B.2 re-prioritization |
 | Unmeasurable success | B.3 objective per-phase exit criteria |
 | Security/test/observability missing | B.4 cross-cutting tracks |
