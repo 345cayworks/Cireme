@@ -21,6 +21,9 @@ export default async function DashboardPage() {
       <p>
         <a href="/mls/compliance">Compliance review →</a>
       </p>
+      <p>
+        <a href="/mls/members">Membership review →</a>
+      </p>
       <p className="muted">
         Further operational modules (listing input, membership) follow.
       </p>
