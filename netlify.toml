@@ -6,7 +6,10 @@
   # Apply DB migrations on real Netlify deploys when a database is configured,
   # then build. Skipped automatically in CI / when DATABASE_URL is unset, so
   # the lazy-env build still succeeds without secrets.
-  command = "if [ \"$NETLIFY\" = \"true\" ] && [ -n \"$DATABASE_URL\" ]; then npm run db:migrate; fi && npm run build"
+  # Runs Drizzle migrations on Netlify when a DB is configured (DATABASE_URL
+  # or the Netlify DB-injected NETLIFY_DATABASE_URL). Set SKIP_DB_MIGRATE=1 as
+  # an escape hatch if a bad URL ever blocks deploys.
+  command = "if [ \"$NETLIFY\" = \"true\" ] && [ -z \"$SKIP_DB_MIGRATE\" ] && { [ -n \"$DATABASE_URL\" ] || [ -n \"$NETLIFY_DATABASE_URL\" ]; }; then npm run db:migrate; fi && npm run build"
   publish = ".next"
 
 [build.environment]

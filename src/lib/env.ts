@@ -20,7 +20,9 @@ let cached: Env | undefined;
 function loadEnv(): Env {
   if (!cached) {
     cached = envSchema.parse({
-      DATABASE_URL: process.env.DATABASE_URL,
+      // Netlify DB (Neon extension) injects NETLIFY_DATABASE_URL.
+      DATABASE_URL:
+        process.env.DATABASE_URL ?? process.env.NETLIFY_DATABASE_URL,
       AUTH_SECRET: process.env.AUTH_SECRET,
       AUTH_URL: process.env.AUTH_URL,
       SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL,

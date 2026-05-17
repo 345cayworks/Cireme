@@ -5,7 +5,10 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "",
+    // Netlify DB (Neon extension) injects NETLIFY_DATABASE_URL; fall back to
+    // it so migrations work without hand-copying the connection string.
+    url:
+      process.env.DATABASE_URL ?? process.env.NETLIFY_DATABASE_URL ?? "",
   },
   strict: true,
   verbose: true,
