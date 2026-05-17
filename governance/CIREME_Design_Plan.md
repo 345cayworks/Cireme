@@ -17,8 +17,8 @@ approved here.
 |---|---|---|
 | 1 | Visual strategy + UX foundation | **Approved** |
 | 2 | Design system foundation | **Approved** |
-| 3 | Public experience design | **Delivered — awaiting approval** |
-| 4 | Login + role entry | Pending |
+| 3 | Public experience design | **Approved** |
+| 4 | Login + role entry | **Delivered — awaiting approval** |
 | 5 | Admin experience | Pending |
 | 6 | Broker experience | Pending |
 | 7 | Agent experience | Pending |
@@ -517,3 +517,104 @@ bottom bar <md. Forms single-column <md, step indicator compact.
 Phase 3 delivered. Phase 4 (login + role entry) does not require the open data
 decisions and can proceed on approval; but **Listings and inquiry cannot be
 built** until #1 (map/geodata) and #8 (leads) get a direction.
+
+---
+
+# DESIGN PHASE 4 — LOGIN + ROLE ENTRY DESIGN
+
+## 1. PHASE SUMMARY
+Designs how people enter the right workspace: the public Login dropdown, the
+login screen(s), post-login redirect logic, signed-in state, and error/edge
+handling. Grounded in the real auth that already exists: a single Auth.js v5
+credentials provider at `/mls/login`, role-aware JWT session, middleware
+gating `/mls/*`, `requirePermission` at call sites, `authorize()` rejecting
+non-`active` accounts, sign-out → `/`.
+
+## 2. EXPERIENCE GOALS
+Fast, calm, trustworthy entry. The visitor picks "who they are" for clarity,
+but security never depends on that choice. One mechanism, branded entries.
+Errors are safe (no account enumeration) and human.
+
+## 3. VISUAL DIRECTION
+Login is a quiet, premium moment: `--canvas` page, single centered `--surface`
+card (max ~420px), Fraunces h2 title, Inter fields, one gold primary button.
+A subtle role label/badge personalizes the card per entry. No marketing
+clutter; minimal nav (logo returns to public Home).
+
+## 4. UX / INFORMATION ARCHITECTURE — KEY DECISION (Phase 1 risk #3 resolved)
+**One auth mechanism, three branded entry points, one login screen.** The
+public `Login ▾` dropdown has Admin / Broker / Agent; each routes to
+`/mls/login?as=admin|broker|agent`. The `as` hint is **cosmetic only**
+(card title, helper copy, post-login emphasis) and is explicitly NOT trusted
+for authorization — access and routing are derived from the account's real
+role in the session. Rationale: the backend is a single credentials flow +
+role redirect; three separate auth pages would add maintenance and failure
+modes with zero security gain (role lives on the account, not the page).
+
+**Redirect logic UX:** after success, route by *actual* role —
+`super_admin`/`mls_admin` → Admin home, `broker`/`office_manager` → Broker
+home, `agent` → Agent home (all under the existing role-aware `/mls/dashboard`
+shell; deep sections are Phases 5–7). If a user was sent to login from a
+deep `/mls` URL, return them there post-login (preserve intent). If the `as`
+hint and real role disagree (e.g., entered via "Agent" but the account is an
+admin), honor the real role silently — never block on the hint.
+
+## 5. PAGE / SCREEN STRUCTURE
+- **Login dropdown:** trigger `Login ▾` in public nav; menu items Admin /
+  Broker / Agent with one-line descriptors. Keyboard + screen-reader
+  compliant (roving focus, Esc closes, `aria-expanded`). Mobile = full-screen
+  sheet, not a cramped menu.
+- **Login screen (`/mls/login`):** centered card — role label/badge, title
+  ("Sign in to the Admin/Broker/Agent workspace" from `as`), email, password
+  with show/hide, primary "Sign in", a quiet "Trouble signing in?" link,
+  legal/footer minimal. Loading state on submit (button spinner, fields
+  locked). Generic error on failure: *"Email or password is incorrect, or the
+  account isn't active yet."* — deliberately generic to avoid revealing
+  whether an email exists or an account is suspended (matches `authorize()`
+  returning null for both). Optional, lower-priority enhancement noted in
+  risks: a distinct "pending approval" state.
+- **Signed-in state:**
+  - Public site while logged in as staff: the `Login ▾` is replaced by a
+    "Go to workspace →" button + account menu (name, role badge, Sign out).
+  - Workspace: top context bar shows workspace name, **role badge**, global
+    search, account menu → Sign out (returns to public Home, matching the
+    implemented `signOut({ redirectTo: "/" })`).
+  - Session expiry mid-task: on next action, route to login with a calm
+    "Your session expired — sign in to continue", then back to intended page.
+- **Sign out:** one click, immediate, returns to public Home with a brief
+  toast.
+
+## 6. COMPONENT GUIDANCE
+Reuses Phase 2 primitives: dropdown, form (input, password+toggle, inline
+error, button loading), card, badge, toast. One composite: the auth card.
+No new primitives. The role badge component is shared with the workspace
+context bar (consistency across Phases 5–7).
+
+## 7. RESPONSIVE RULES
+Dropdown → full-screen sheet < md. Login card is full-width with comfortable
+gutters < sm, centered max ~420px ≥ sm. Inputs ≥44px touch targets, visible
+gold focus ring. "Go to workspace" collapses into the mobile menu when
+signed in.
+
+## 8. OPEN QUESTIONS / RISKS
+- **Password recovery (high, real gap):** there is no email subsystem, so no
+  self-serve "forgot password". Interim UX: "Trouble signing in?" explains
+  that an administrator (or the deploy-time bootstrap, for super-admin) resets
+  access. A real reset flow needs an email provider — engineering dependency;
+  flagged, not designed-as-if-existing.
+- **Generic vs specific errors (decision):** chosen generic for security
+  (no enumeration). If the business wants a friendlier "your application is
+  still pending" message, that intentionally leaks account state — needs an
+  explicit decision; default stays generic.
+- **Rate limiting/lockout (security):** no brute-force protection exists.
+  Design reserves space for a "too many attempts, try again later" state;
+  implementing it is an engineering dependency (e.g., the available Arcjet
+  extension or app-level throttling).
+- **MFA (future):** not in scope; the auth card layout leaves room for a
+  later second-factor step without redesign.
+- Carried, non-blocking here: #1 map/geodata, #2 RPPI, #8 leads.
+
+## 9. STOP AND WAIT FOR APPROVAL
+Phase 4 delivered. Phase 5 (Admin experience) can proceed on approval and is
+independent of the open data questions, though the Admin "Leads" and
+"Applications" areas will surface risk #8 again.
