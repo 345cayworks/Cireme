@@ -618,3 +618,24 @@ signed in.
 Phase 4 delivered. Phase 5 (Admin experience) can proceed on approval and is
 independent of the open data questions, though the Admin "Leads" and
 "Applications" areas will surface risk #8 again.
+
+---
+
+# OPEN-QUESTION RESOLUTIONS (implementation log)
+
+- **Risk #1 — map/geodata: RESOLVED.** Decision: *district markers now,
+  upgrade-ready*. No per-listing coordinates added; `src/data/cayman-districts.ts`
+  holds approximate district centroids + labels and is the stable contract a
+  future precise-pin upgrade can swap into without API changes. Listings shows
+  a district summary (counts) and district labels; a tile-based slippy map was
+  deliberately avoided to preserve the deployed CSP (no external tile hosts).
+- **Risk #2 — RPPI source: RESOLVED.** Official Cayman Government RPPI ingested
+  (`src/data/rppi.ts`); projection tool ships with the approved low–mid–high
+  band and mandated estimates-only disclaimer.
+- **Risk #8 — leads: RESOLVED.** Inquiries route to email + the existing
+  applications flow; no leads table introduced.
+- **Added:** Lands & Survey transaction-activity dataset (`src/data/las.ts`)
+  and a richer **Market intelligence** view (`/tools/market`) combining the
+  RPPI price index (per-region growth) with transaction volume/mix, with all
+  provider caveats surfaced. No new top-nav item (respects the
+  no-"Market Trends"-nav decision); reached via Tools.

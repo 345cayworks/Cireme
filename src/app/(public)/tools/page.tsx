@@ -34,6 +34,16 @@ export default function ToolsPage() {
             index.
           </p>
         </Link>
+        <Link
+          href={"/tools/market" as Route}
+          className="card"
+          style={{ display: "block" }}
+        >
+          <h3>Market intelligence</h3>
+          <p className="muted">
+            Price trends by region and Cayman-wide transaction activity.
+          </p>
+        </Link>
       </div>
 
       <p className="disclaimer" style={{ marginTop: "2rem" }}>

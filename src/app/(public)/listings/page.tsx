@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { listingMedia, listings } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import { isPubliclyVisible, toPublicListing } from "@/lib/public-safe";
+import { CAYMAN_DISTRICTS, DISTRICT_LABEL } from "@/data/cayman-districts";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,27 @@ export default async function ListingsPage() {
       <p className="muted" style={{ marginTop: "-0.25rem" }}>
         {visible.length} propert{visible.length === 1 ? "y" : "ies"} available
       </p>
+
+      {visible.length > 0 ? (
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            flexWrap: "wrap",
+            marginTop: "1rem",
+          }}
+        >
+          {CAYMAN_DISTRICTS.map((d) => {
+            const n = visible.filter((l) => l.district === d.value).length;
+            if (n === 0) return null;
+            return (
+              <span key={d.value} className="badge">
+                {d.label} · {n}
+              </span>
+            );
+          })}
+        </div>
+      ) : null}
 
       {visible.length === 0 ? (
         <div className="card" style={{ marginTop: "1.5rem" }}>
@@ -103,7 +125,8 @@ export default async function ListingsPage() {
                     {l.title}
                   </div>
                   <div className="muted" style={{ fontSize: "0.9rem" }}>
-                    {l.district.replace(/_/g, " ")} · {l.propertyType} ·{" "}
+                    {DISTRICT_LABEL[l.district] ?? l.district} ·{" "}
+                    {l.propertyType} ·{" "}
                     {l.tenure}
                   </div>
                 </div>
