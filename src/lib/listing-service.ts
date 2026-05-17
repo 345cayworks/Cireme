@@ -2,10 +2,9 @@
  * Listing lifecycle service (Phase 4) — applies lifecycle rules and records
  * the append-only history + audit trail.
  *
- * The Neon HTTP driver is single-statement (no multi-statement transactions),
- * so writes are ordered main-mutation-first, then history, then audit. History
- * and audit rows are append-only; the Phase 5 compliance sweep reconciles any
- * gap between a listing's current state and its history tail.
+ * Each mutation runs in a single transaction (Neon Pool/WebSocket driver), so
+ * the listing change and its history + audit rows commit atomically: there is
+ * no observable state where a listing moved without a matching audit record.
  */
 import { eq, sql } from "drizzle-orm";
 
@@ -35,8 +34,10 @@ export class ListingNotFoundError extends Error {
   }
 }
 
-async function loadListing(listingId: string) {
-  const [row] = await db
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+async function loadListing(tx: Tx, listingId: string) {
+  const [row] = await tx
     .select()
     .from(listings)
     .where(eq(listings.id, listingId))
@@ -45,8 +46,8 @@ async function loadListing(listingId: string) {
   return row;
 }
 
-async function mediaCount(listingId: string): Promise<number> {
-  const [row] = await db
+async function mediaCount(tx: Tx, listingId: string): Promise<number> {
+  const [row] = await tx
     .select({ n: sql<number>`count(*)::int` })
     .from(listingMedia)
     .where(eq(listingMedia.listingId, listingId));
@@ -60,55 +61,58 @@ export async function transitionListingStatus(params: {
   note?: string;
 }) {
   const { listingId, toStatus, actorId, note } = params;
-  const listing = await loadListing(listingId);
-  const fromStatus = listing.status;
 
-  if (fromStatus === toStatus) return listing;
+  return db.transaction(async (tx) => {
+    const listing = await loadListing(tx, listingId);
+    const fromStatus = listing.status;
 
-  if (!canTransition(fromStatus, toStatus)) {
-    throw new ListingTransitionError(fromStatus, toStatus);
-  }
+    if (fromStatus === toStatus) return listing;
 
-  if (requiresCompleteness(fromStatus, toStatus)) {
-    const result = validateCompleteness(
-      listing,
-      await mediaCount(listingId),
-    );
-    if (!result.ok) throw new ListingIncompleteError(result.missing);
-  }
+    if (!canTransition(fromStatus, toStatus)) {
+      throw new ListingTransitionError(fromStatus, toStatus);
+    }
 
-  const now = new Date();
-  const setPublishedAt =
-    toStatus === "active" && listing.publishedAt === null;
+    if (requiresCompleteness(fromStatus, toStatus)) {
+      const result = validateCompleteness(
+        listing,
+        await mediaCount(tx, listingId),
+      );
+      if (!result.ok) throw new ListingIncompleteError(result.missing);
+    }
 
-  const [updated] = await db
-    .update(listings)
-    .set({
-      status: toStatus,
-      updatedAt: now,
-      ...(setPublishedAt ? { publishedAt: now } : {}),
-    })
-    .where(eq(listings.id, listingId))
-    .returning();
+    const now = new Date();
+    const setPublishedAt =
+      toStatus === "active" && listing.publishedAt === null;
 
-  await db.insert(listingStatusHistory).values({
-    listingId,
-    fromStatus,
-    toStatus,
-    changedBy: actorId,
-    note: note ?? null,
+    const [updated] = await tx
+      .update(listings)
+      .set({
+        status: toStatus,
+        updatedAt: now,
+        ...(setPublishedAt ? { publishedAt: now } : {}),
+      })
+      .where(eq(listings.id, listingId))
+      .returning();
+
+    await tx.insert(listingStatusHistory).values({
+      listingId,
+      fromStatus,
+      toStatus,
+      changedBy: actorId,
+      note: note ?? null,
+    });
+
+    await tx.insert(auditLog).values({
+      actorId,
+      entity: "listing",
+      entityId: listingId,
+      action: "status_change",
+      before: { status: fromStatus },
+      after: { status: toStatus },
+    });
+
+    return updated;
   });
-
-  await db.insert(auditLog).values({
-    actorId,
-    entity: "listing",
-    entityId: listingId,
-    action: "status_change",
-    before: { status: fromStatus },
-    after: { status: toStatus },
-  });
-
-  return updated;
 }
 
 export async function changeListingPrice(params: {
@@ -117,32 +121,35 @@ export async function changeListingPrice(params: {
   actorId: string;
 }) {
   const { listingId, newPriceKyd, actorId } = params;
-  const listing = await loadListing(listingId);
-  const oldPriceKyd = listing.priceKyd;
 
-  if (oldPriceKyd === newPriceKyd) return listing;
+  return db.transaction(async (tx) => {
+    const listing = await loadListing(tx, listingId);
+    const oldPriceKyd = listing.priceKyd;
 
-  const [updated] = await db
-    .update(listings)
-    .set({ priceKyd: newPriceKyd, updatedAt: new Date() })
-    .where(eq(listings.id, listingId))
-    .returning();
+    if (oldPriceKyd === newPriceKyd) return listing;
 
-  await db.insert(listingPriceHistory).values({
-    listingId,
-    oldPriceKyd,
-    newPriceKyd,
-    changedBy: actorId,
+    const [updated] = await tx
+      .update(listings)
+      .set({ priceKyd: newPriceKyd, updatedAt: new Date() })
+      .where(eq(listings.id, listingId))
+      .returning();
+
+    await tx.insert(listingPriceHistory).values({
+      listingId,
+      oldPriceKyd,
+      newPriceKyd,
+      changedBy: actorId,
+    });
+
+    await tx.insert(auditLog).values({
+      actorId,
+      entity: "listing",
+      entityId: listingId,
+      action: "price_change",
+      before: { priceKyd: oldPriceKyd },
+      after: { priceKyd: newPriceKyd },
+    });
+
+    return updated;
   });
-
-  await db.insert(auditLog).values({
-    actorId,
-    entity: "listing",
-    entityId: listingId,
-    action: "price_change",
-    before: { priceKyd: oldPriceKyd },
-    after: { priceKyd: newPriceKyd },
-  });
-
-  return updated;
 }
