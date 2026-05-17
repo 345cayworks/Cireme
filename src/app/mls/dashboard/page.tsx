@@ -16,6 +16,9 @@ export default async function DashboardPage() {
         </p>
       </div>
       <p style={{ marginTop: "1.5rem" }}>
+        <a href="/mls/listings">My listings →</a>
+      </p>
+      <p>
         <a href="/mls/compliance">Compliance review →</a>
       </p>
       <p className="muted">

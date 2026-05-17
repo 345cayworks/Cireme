@@ -54,6 +54,60 @@ async function mediaCount(tx: Tx, listingId: string): Promise<number> {
   return row?.n ?? 0;
 }
 
+type NewListingInput = {
+  title: string;
+  propertyType: (typeof listings.$inferInsert)["propertyType"];
+  district: (typeof listings.$inferInsert)["district"];
+  tenure: (typeof listings.$inferInsert)["tenure"];
+  agentId: string;
+  officeId: string | null;
+  priceKyd?: string | null;
+  publicDescription?: string | null;
+  landBlock?: string | null;
+  landParcel?: string | null;
+  bedrooms?: number | null;
+  bathrooms?: string | null;
+  areaSqFt?: number | null;
+};
+
+/** Creates a listing in `draft` and records the creation in the audit log. */
+export async function createListing(input: NewListingInput) {
+  return db.transaction(async (tx) => {
+    const publicReference = `CIR-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+
+    const [created] = await tx
+      .insert(listings)
+      .values({
+        publicReference,
+        title: input.title,
+        propertyType: input.propertyType,
+        status: "draft",
+        district: input.district,
+        tenure: input.tenure,
+        agentId: input.agentId,
+        officeId: input.officeId,
+        priceKyd: input.priceKyd ?? null,
+        publicDescription: input.publicDescription ?? null,
+        landBlock: input.landBlock ?? null,
+        landParcel: input.landParcel ?? null,
+        bedrooms: input.bedrooms ?? null,
+        bathrooms: input.bathrooms ?? null,
+        areaSqFt: input.areaSqFt ?? null,
+      })
+      .returning();
+
+    await tx.insert(auditLog).values({
+      actorId: input.agentId,
+      entity: "listing",
+      entityId: created!.id,
+      action: "listing_created",
+      after: { publicReference, status: "draft" },
+    });
+
+    return created!;
+  });
+}
+
 export async function transitionListingStatus(params: {
   listingId: string;
   toStatus: ListingStatus;
