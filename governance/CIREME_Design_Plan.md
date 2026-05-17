@@ -19,7 +19,7 @@ approved here.
 | 2 | Design system foundation | **Approved** |
 | 3 | Public experience design | **Approved** |
 | 4 | Login + role entry | **Approved — implemented to spec** |
-| 5 | Admin experience | Pending |
+| 5 | Admin experience | **Delivered — awaiting approval** |
 | 6 | Broker experience | Pending |
 | 7 | Agent experience | Pending |
 | 8 | Tools experience | Pending |
@@ -618,6 +618,194 @@ signed in.
 Phase 4 delivered. Phase 5 (Admin experience) can proceed on approval and is
 independent of the open data questions, though the Admin "Leads" and
 "Applications" areas will surface risk #8 again.
+
+---
+
+# DESIGN PHASE 5 — ADMIN EXPERIENCE DESIGN
+
+## 1. PHASE SUMMARY
+Designs the Admin workspace: the shell (rail + context bar), the admin home,
+and the three live oversight surfaces that already exist in code —
+**Applications/Members**, **Listing moderation**, **Compliance** — plus a
+read-only **Audit** view over the existing append-only `auditLog`. Grounded
+in the real RBAC and schema: "admin" = `super_admin` (all permissions incl.
+`platform:admin`) and `mls_admin` (`member:approve`, `compliance:review`,
+`listing:moderate`). `broker`/`office_manager`/`agent` are *not* admin and
+get Phases 6–7. Every admin mutation already runs as an audited Drizzle
+transaction guarded by `requirePermission` at the call site; this phase
+designs UI over those exact actions and state machines — nothing here
+assumes an action the codebase does not have.
+
+## 2. EXPERIENCE GOALS
+- **Oversight, not data entry.** Admin's job is to *decide* — approve, deny,
+  enforce, correct — over queues others generate. The UI optimizes triage:
+  what needs me, in what order, with the context to act in one place.
+- **Every action is accountable.** Because the backend writes
+  actor/entity/before/after to `auditLog` on every mutation, the UI makes
+  that visible (who did what, when) rather than hiding it — accountability
+  is a feature, not a side effect.
+- **Safe by default.** Irreversible/heavy actions (deny, suspend, terminate,
+  unpublish, remove) are deliberate, confirmed, and never optimistic.
+- **Truthful about gaps.** Where a workflow has a real backend limitation
+  (e.g., application approval needs a pre-existing user account), the UI
+  states it plainly instead of pretending it works.
+- **Calm under volume.** Designed to stay legible whether there are 3 items
+  or 300; queues, filters, and pagination over hero dashboards.
+
+## 3. VISUAL DIRECTION
+Workspace dark frame from Phase 2: `--obsidian-900` app base,
+`--obsidian-800` rail/context bar, **light `--surface` data cards and
+tables** for long reading sessions, Inter throughout (Fraunces not used below
+h2 in workspace — density). Gold is reserved for the single primary action
+per view and headline metrics only; **status uses the semantic ramp, never
+gold** (e.g. pending = warning, active = success, suspended/denied = error,
+under-review = info). Hairline `rgba(255,255,255,.08)` borders on the dark
+frame; `e1/e2` elevation only on light cards. Role badge ("Administrator")
+in the context bar is the shared badge component from Phase 4.
+
+## 4. UX / INFORMATION ARCHITECTURE
+**Admin rail (left, 264px / 72 collapsed):** Dashboard · Applications ·
+Members · Listings · Compliance · Audit. Rail items map to the real routes
+and permissions; an item whose permission the signed-in admin lacks is
+hidden, not shown-disabled (mirrors `requirePermission` — `mls_admin` sees
+all six; a future limited admin would see a subset). **No "Brokers",
+"Agents", "Offices", or "Leads" rail items** — there is no office-management
+action, no per-role admin page, and no leads table in code (risk #8); agents
+and brokers are managed *within* Members, and inquiries continue to route via
+email/applications per the existing resolution. Office is shown as read-only
+context on member/listing rows, not an editable area (no office mutation
+exists).
+
+**Context bar:** workspace name · **Administrator** role badge · global
+search (scopes: applications, members, listings, compliance) · account menu
+→ Sign out (→ public Home, per implemented `signOut`). Breadcrumbs appear on
+any drill-in (e.g. Compliance → Issue #).
+
+**Decision-queue model:** Applications and Compliance are *queues* (things in
+a non-terminal state needing an admin decision) with an explicit terminal
+state. Members and Listings are *registries* (browse/filter all, act on one).
+This split drives the screen designs below.
+
+## 5. PAGE / SCREEN STRUCTURE
+
+**Admin Dashboard (`/mls/dashboard`, role-aware home).** Not a vanity
+dashboard — a triage board. Stat cards (Phase 2 stat card, tabular numerics):
+*Applications awaiting review* (status `submitted`/`under_review`), *Open
+compliance issues*, *Listings pending moderation*, *Suspended/inactive
+members*. Each card's value links straight into the filtered queue. Below:
+"Needs you" — the oldest few open applications and compliance issues with a
+one-click path to act. Recent activity strip = last N `auditLog` entries
+(actor · action · entity · time). Empty state = "Nothing needs a decision
+right now."
+
+**Applications (queue; `member:approve`).** Table of `applications`:
+applicant email · requested type (`private_seller`/`independent_broker`/
+`advertiser`) · status · submitted age · reviewer. Default filter = open
+(`submitted`, `under_review`); chips for all states incl. terminal
+(`approved`/`denied`/`withdrawn`). Row → detail drawer with `metadata`
+(name/firm/message) and the **allowed transitions only**, derived from the
+real state machine: `submitted → under_review | withdrawn`;
+`under_review → approved | denied | withdrawn`. **Approval honesty (real
+backend constraint):** `transitionApplication` only provisions a membership
++ activates the account when a user with the matching `applicantEmail`
+already exists; otherwise it approves the application but creates no account.
+The drawer surfaces this *before* the admin clicks: a clear inline notice
+"No user account exists for this email — approving records the decision but
+does not grant access until an account is provisioned." Deny/withdraw require
+a confirm modal with an optional note (audited). No bulk approve (no bulk
+backend action — see risks).
+
+**Members (registry; `member:approve`).** Table of memberships joined to
+users: display name · email · membership type · account status
+(`pending`/`active`/`suspended`/`inactive`) · office (read-only) · approved
+by/at. Filter by status/type; search by name/email. Row → member panel:
+identity, current status, **status history** (`membershipStatusHistory`:
+from→to, by, note) rendered as a timeline. Action = change account status
+via the allowed transitions with a **mandatory audit note**; suspend/inactive
+are destructive → confirm modal (pending state, never optimistic). The panel
+shows the user's role but role *editing* is out of scope (no role-change
+action exists — flagged, not faked).
+
+**Listings (moderation registry; `listing:moderate`).** Admin sees *all*
+listings (not just own). Table: public reference · title · district ·
+status (9-state `listing_status`) · agent/office · price (KYD, tabular) ·
+updated. Filters by status/district; search by reference/title. Row → listing
+moderation panel: public-safe fields **and** `privateRemarks` (admin may see
+private; never exposed publicly), media thumbnails, status history and price
+history timelines. Moderation actions reuse the real listing transitions and
+the compliance action types — flagging or requesting a correction creates a
+compliance issue/action rather than a silent edit; `unpublished`/`removed`
+are destructive confirms. Admin does not edit listing content here (no admin
+content-edit action) — moderation is status/enforcement, authoring stays with
+the agent (Phase 7).
+
+**Compliance (queue; `compliance:review`).** Open `complianceIssues` list:
+type (`missing_required_fields` · `stale_listing` · `duplicate` ·
+`misleading_media` · `incorrect_classification` · `sold_left_active`) ·
+linked listing · detail · age. Primary action **"Run sweep"**
+(`runComplianceSweep`) with a clear running/result state. Row → issue detail:
+the offending listing in context + the `complianceActions` history, and the
+enforcement ladder exactly as the enum allows — `flagged` →
+`correction_requested` → `unpublished` → `removed`, and the account-level
+`account_suspended` / `account_terminated`. Each requires a note;
+account-level actions and `removed` require a **typed-confirmation** modal
+(Phase 2 destructive rule — termination = type to confirm). "Dismiss as false
+positive" (`dismissComplianceIssue`) needs a note and resolves the issue.
+
+**Audit (read-only; `platform:admin`, so `super_admin` only).** Reverse-chron
+table over `auditLog`: actor · action · entity/entityId · time, expandable to
+the before/after JSON diff (mono token). Filters by entity type, actor, date.
+No mutations. If the signed-in admin is `mls_admin` (lacks `platform:admin`),
+the rail item is hidden — consistent with the permission model; the
+"recent activity" strip on the dashboard gives them a lightweight subset.
+
+## 6. COMPONENT GUIDANCE
+Reuses Phase 2 primitives only: workspace rail + context bar, stat card,
+data table (desktop sticky-header rows → mobile stacked cards), filter/chip
+bar, detail **drawer/panel**, status **badge** (semantic, shared with
+Phase 4), confirm modal (incl. typed-confirmation variant), toast, empty/
+loading skeletons, and a **status/history timeline** (the one composite
+introduced here — a vertical from→to list reused by Members, Listings, and
+Compliance; built from existing list + badge + meta primitives, no new
+token). The before/after **diff view** in Audit is the mono-token panel from
+Phase 2, not a new primitive.
+
+## 7. RESPONSIVE RULES
+Per Phase 2 workspace rules: rail icons-only at `md`, drawer at `< md`;
+context-bar search collapses to an icon trigger `< md`; every admin table
+degrades to stacked cards exposing 3–4 key fields + the primary row action,
+rest behind "Details". Detail drawers become full-screen sheets `< md`.
+Confirm modals stay centered and dismiss-guarded. Touch targets ≥ 44px;
+gold focus ring always visible on the dark frame.
+
+## 8. OPEN QUESTIONS / RISKS
+- **Application approval ≠ account creation (high, real backend gap).**
+  `transitionApplication` provisions access only if a user already exists for
+  the applicant email; there is no self-signup and no admin "create user"
+  action. The UI is designed to *disclose* this, but the end-to-end "approve
+  → person can log in" journey needs a user-provisioning action/flow
+  (engineering dependency). Flagged, not designed-as-if-existing.
+- **No bulk actions (medium).** All admin server actions are single-entity.
+  Queues are designed single-row; multi-select/bulk approve-deny is a
+  deliberate non-goal until a bulk transactional+audited backend exists.
+- **No role/office management (medium).** No action changes a user's role or
+  edits offices; Members shows role/office read-only. If admins must promote/
+  reassign or manage offices, that is new backend work — out of Phase 5.
+- **`listing:moderate` UI was a stub (medium).** The permission and state
+  machine exist but the moderation surface was not built; this phase specifies
+  it strictly within existing transitions/compliance actions (no new mutation
+  invented).
+- **Leads (carried #8).** No leads table; Admin has no Leads area by design —
+  inquiries continue via email/applications per the prior resolution.
+- **No password reset / rate limiting (carried from Phase 4).** Admin cannot
+  trigger a user password reset (no email subsystem); "restore access" =
+  status change only. Unchanged engineering dependency.
+
+## 9. STOP AND WAIT FOR APPROVAL
+Phase 5 delivered. Phase 6 (Broker experience) can proceed on approval. The
+high risk (approval not provisioning accounts) does not block the *design* of
+Phases 6–7 but should get a direction before the Admin workspace is built,
+since it changes the Applications screen's success path.
 
 ---
 
