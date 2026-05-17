@@ -2,40 +2,115 @@ import type { Route } from "next";
 import Link from "next/link";
 
 import { db } from "@/db";
-import { listings } from "@/db/schema";
+import { listingMedia, listings } from "@/db/schema";
+import { inArray } from "drizzle-orm";
 import { isPubliclyVisible, toPublicListing } from "@/lib/public-safe";
 
 export const dynamic = "force-dynamic";
 
+function statusBadge(status: string) {
+  const cls =
+    status === "active"
+      ? "badge badge--active"
+      : status === "pending"
+        ? "badge badge--pending"
+        : status === "sold"
+          ? "badge badge--sold"
+          : "badge";
+  return <span className={cls}>{status}</span>;
+}
+
 export default async function ListingsPage() {
-  const rows = await db.select().from(listings).limit(50);
+  const rows = await db.select().from(listings).limit(60);
   const visible = rows.filter(isPubliclyVisible).map(toPublicListing);
+
+  const ids = visible.map((l) => l.id);
+  const media = ids.length
+    ? await db
+        .select()
+        .from(listingMedia)
+        .where(inArray(listingMedia.listingId, ids))
+    : [];
+  const primaryByListing = new Map<string, string>();
+  for (const m of media) {
+    if (!primaryByListing.has(m.listingId) || m.isPrimary) {
+      primaryByListing.set(m.listingId, m.blobKey);
+    }
+  }
 
   return (
     <main>
-      <p className="muted">
-        <Link href="/">← CIREME</Link>
-      </p>
+      <p className="eyebrow">Cayman Islands</p>
       <h1>Listings</h1>
+      <p className="muted" style={{ marginTop: "-0.25rem" }}>
+        {visible.length} propert{visible.length === 1 ? "y" : "ies"} available
+      </p>
+
       {visible.length === 0 ? (
-        <p className="muted">No public listings yet.</p>
+        <div className="card" style={{ marginTop: "1.5rem" }}>
+          <p className="muted" style={{ margin: 0 }}>
+            No public listings yet — please check back soon.
+          </p>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {visible.map((l) => (
-            <li key={l.id} className="card" style={{ marginBottom: "1rem" }}>
+        <div className="grid" style={{ marginTop: "1.5rem" }}>
+          {visible.map((l) => {
+            const key = primaryByListing.get(l.id);
+            return (
               <Link
+                key={l.id}
                 href={`/listings/${l.id}` as Route}
-                style={{ textDecoration: "none", color: "inherit" }}
+                className="listing-card"
+                style={{ display: "block" }}
               >
-                <strong>{l.title}</strong>
-                <div className="muted">
-                  {l.district} · {l.propertyType} · {l.tenure} ·{" "}
-                  {l.priceKyd ? `KYD ${l.priceKyd}` : "Price on request"}
+                {key ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    className="listing-card__media"
+                    src={`/api/media/${key}`}
+                    alt={l.title}
+                  />
+                ) : (
+                  <div
+                    className="listing-card__media"
+                    aria-hidden="true"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--n-400)",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    CIREME
+                  </div>
+                )}
+                <div className="listing-card__body">
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <span className="listing-card__price">
+                      {l.priceKyd ? `KYD ${l.priceKyd}` : "Price on request"}
+                    </span>
+                    {statusBadge(l.status)}
+                  </div>
+                  <div style={{ fontWeight: 600, color: "var(--n-900)" }}>
+                    {l.title}
+                  </div>
+                  <div className="muted" style={{ fontSize: "0.9rem" }}>
+                    {l.district.replace(/_/g, " ")} · {l.propertyType} ·{" "}
+                    {l.tenure}
+                  </div>
                 </div>
               </Link>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </main>
   );
