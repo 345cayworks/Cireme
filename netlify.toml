@@ -3,13 +3,13 @@
 # and security headers now live in the repo.
 
 [build]
-  # Apply DB migrations on real Netlify deploys when a database is configured,
-  # then build. Skipped automatically in CI / when DATABASE_URL is unset, so
-  # the lazy-env build still succeeds without secrets.
-  # Runs Drizzle migrations on Netlify when a DB is configured (DATABASE_URL
-  # or the Netlify DB-injected NETLIFY_DATABASE_URL). Set SKIP_DB_MIGRATE=1 as
-  # an escape hatch if a bad URL ever blocks deploys.
-  command = "if [ \"$NETLIFY\" = \"true\" ] && [ -z \"$SKIP_DB_MIGRATE\" ] && { [ -n \"$DATABASE_URL\" ] || [ -n \"$NETLIFY_DATABASE_URL\" ]; }; then npm run db:migrate; fi && npm run build"
+  # On a real Netlify deploy with a database configured: apply Drizzle
+  # migrations, then (if the super-admin secrets are set) create/refresh the
+  # super-admin account, then build. The bootstrap is idempotent, so running
+  # it every deploy is safe. Escape hatches: SKIP_DB_MIGRATE=1 skips the DB
+  # step entirely; SKIP_ADMIN_BOOTSTRAP=1 skips only the admin step. Skipped
+  # automatically in CI / when no database is configured.
+  command = "if [ \"$NETLIFY\" = \"true\" ] && [ -z \"$SKIP_DB_MIGRATE\" ] && { [ -n \"$DATABASE_URL\" ] || [ -n \"$NETLIFY_DATABASE_URL\" ]; }; then npm run db:migrate && if [ -z \"$SKIP_ADMIN_BOOTSTRAP\" ] && [ -n \"$SUPER_ADMIN_EMAIL\" ] && [ -n \"$SUPERADMIN_MASTER_KEY\" ]; then npm run db:bootstrap-admin; fi; fi && npm run build"
   publish = ".next"
 
 [build.environment]
