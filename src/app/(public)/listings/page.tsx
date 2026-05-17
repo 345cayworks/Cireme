@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import { db } from "@/db";
@@ -22,11 +23,16 @@ export default async function ListingsPage() {
         <ul style={{ listStyle: "none", padding: 0 }}>
           {visible.map((l) => (
             <li key={l.id} className="card" style={{ marginBottom: "1rem" }}>
-              <strong>{l.title}</strong>
-              <div className="muted">
-                {l.district} · {l.propertyType} · {l.tenure} ·{" "}
-                {l.priceKyd ? `KYD ${l.priceKyd}` : "Price on request"}
-              </div>
+              <Link
+                href={`/listings/${l.id}` as Route}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <strong>{l.title}</strong>
+                <div className="muted">
+                  {l.district} · {l.propertyType} · {l.tenure} ·{" "}
+                  {l.priceKyd ? `KYD ${l.priceKyd}` : "Price on request"}
+                </div>
+              </Link>
             </li>
           ))}
         </ul>

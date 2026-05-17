@@ -12,7 +12,10 @@ import {
   createListing,
   transitionListingStatus,
 } from "@/lib/listing-service";
+import { addListingMedia, deleteListingMedia } from "@/lib/media-service";
 import { can } from "@/lib/rbac";
+
+const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
 
 const createSchema = z.object({
   title: z.string().trim().min(3).max(200),
@@ -127,6 +130,42 @@ export async function changePriceAction(formData: FormData) {
   await changeListingPrice({
     listingId: parsed.data.listingId,
     newPriceKyd: parsed.data.newPriceKyd,
+    actorId: user.id,
+  });
+  revalidatePath("/mls/listings");
+}
+
+export async function uploadMediaAction(formData: FormData) {
+  const user = await requirePermission("listing:edit:own");
+  const listingId = formData.get("listingId");
+  const file = formData.get("file");
+
+  if (typeof listingId !== "string" || !(file instanceof File)) return;
+  if (file.size === 0 || file.size > MAX_MEDIA_BYTES) return;
+  if (!file.type.startsWith("image/")) return;
+
+  await assertCanEdit(user, listingId);
+  await addListingMedia({ listingId, file, actorId: user.id });
+  revalidatePath("/mls/listings");
+}
+
+const deleteMediaSchema = z.object({
+  listingId: z.string().uuid(),
+  mediaId: z.string().uuid(),
+});
+
+export async function deleteMediaAction(formData: FormData) {
+  const user = await requirePermission("listing:edit:own");
+  const parsed = deleteMediaSchema.safeParse({
+    listingId: formData.get("listingId"),
+    mediaId: formData.get("mediaId"),
+  });
+  if (!parsed.success) return;
+
+  await assertCanEdit(user, parsed.data.listingId);
+  await deleteListingMedia({
+    listingId: parsed.data.listingId,
+    mediaId: parsed.data.mediaId,
     actorId: user.id,
   });
   revalidatePath("/mls/listings");

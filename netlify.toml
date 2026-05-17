@@ -1,0 +1,27 @@
+# Netlify configuration — versioned (was previously UI-only).
+# Fixes the IaC gap: build command, Node pin, Next plugin, migrate-on-deploy,
+# and security headers now live in the repo.
+
+[build]
+  # Apply DB migrations on real Netlify deploys when a database is configured,
+  # then build. Skipped automatically in CI / when DATABASE_URL is unset, so
+  # the lazy-env build still succeeds without secrets.
+  command = "if [ \"$NETLIFY\" = \"true\" ] && [ -n \"$DATABASE_URL\" ]; then npm run db:migrate; fi && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Baseline security headers for static/proxied responses. App-route (SSR)
+# headers are also set in next.config.ts so they apply to dynamic responses.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), browsing-topics=()"

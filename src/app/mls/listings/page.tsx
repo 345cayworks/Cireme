@@ -1,15 +1,17 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import Link from "next/link";
 
 import { db } from "@/db";
-import { listings } from "@/db/schema";
+import { listingMedia, listings } from "@/db/schema";
 import { ForbiddenError, requirePermission } from "@/lib/auth-guard";
 import { allowedTransitions } from "@/lib/listing-lifecycle";
 import { can } from "@/lib/rbac";
 import {
   changePriceAction,
   createListingAction,
+  deleteMediaAction,
   transitionAction,
+  uploadMediaAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +68,21 @@ export default async function ListingsAdminPage() {
         .where(eq(listings.agentId, user.id))
         .orderBy(desc(listings.updatedAt))
         .limit(200);
+
+  const ids = rows.map((r) => r.id);
+  const mediaRows = ids.length
+    ? await db
+        .select()
+        .from(listingMedia)
+        .where(inArray(listingMedia.listingId, ids))
+        .orderBy(listingMedia.position)
+    : [];
+  const mediaByListing = new Map<string, typeof mediaRows>();
+  for (const m of mediaRows) {
+    const list = mediaByListing.get(m.listingId) ?? [];
+    list.push(m);
+    mediaByListing.set(m.listingId, list);
+  }
 
   return (
     <main>
@@ -202,6 +219,81 @@ export default async function ListingsAdminPage() {
                     style={{ margin: 0, maxWidth: 200 }}
                   />
                   <button type="submit">Update price</button>
+                </form>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  {(mediaByListing.get(listing.id) ?? []).map((m) => (
+                    <form
+                      key={m.id}
+                      action={deleteMediaAction}
+                      style={{ position: "relative" }}
+                    >
+                      <input
+                        type="hidden"
+                        name="listingId"
+                        value={listing.id}
+                      />
+                      <input type="hidden" name="mediaId" value={m.id} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/api/media/${m.blobKey}`}
+                        alt={m.caption ?? "listing media"}
+                        style={{
+                          height: 64,
+                          width: 64,
+                          objectFit: "cover",
+                          borderRadius: 6,
+                          display: "block",
+                        }}
+                      />
+                      <button
+                        type="submit"
+                        title="Remove"
+                        style={{
+                          position: "absolute",
+                          top: -6,
+                          right: -6,
+                          background: "#c0392b",
+                          color: "#fff",
+                          borderRadius: "50%",
+                          width: 20,
+                          height: 20,
+                          lineHeight: "20px",
+                          padding: 0,
+                          fontSize: 12,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </form>
+                  ))}
+                </div>
+
+                <form
+                  action={uploadMediaAction}
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  <input type="hidden" name="listingId" value={listing.id} />
+                  <input
+                    type="file"
+                    name="file"
+                    accept="image/*"
+                    required
+                    style={{ margin: 0 }}
+                  />
+                  <button type="submit">Upload image</button>
                 </form>
               </li>
             );
