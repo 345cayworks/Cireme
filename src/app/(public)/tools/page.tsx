@@ -1,3 +1,6 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 export const metadata = { title: "Tools — CIREME" };
 
 export default function ToolsPage() {
@@ -10,24 +13,27 @@ export default function ToolsPage() {
       </p>
 
       <div className="triptych" style={{ marginTop: "1.5rem" }}>
-        <div className="card">
+        <Link
+          href={"/tools/mortgage" as Route}
+          className="card"
+          style={{ display: "block" }}
+        >
           <h3>Mortgage calculator</h3>
           <p className="muted">
             Estimate a monthly payment from price, deposit, rate and term.
           </p>
-          <p className="badge" style={{ marginTop: "0.5rem" }}>
-            Coming soon
-          </p>
-        </div>
-        <div className="card">
+        </Link>
+        <Link
+          href={"/tools/rppi" as Route}
+          className="card"
+          style={{ display: "block" }}
+        >
           <h3>Price projection (RPPI)</h3>
           <p className="muted">
-            An indicative 5-year outlook by district.
+            An indicative 5-year outlook by region, from the official Cayman
+            index.
           </p>
-          <p className="badge" style={{ marginTop: "0.5rem" }}>
-            Coming soon
-          </p>
-        </div>
+        </Link>
       </div>
 
       <p className="disclaimer" style={{ marginTop: "2rem" }}>
