@@ -14,6 +14,7 @@ import {
   uploadMediaAction,
 } from "./actions";
 import PropertyMap from "@/components/PropertyMap";
+import ListingModeration from "./ListingModeration";
 
 export const dynamic = "force-dynamic";
 
@@ -35,25 +36,42 @@ const DISTRICTS = [
 ] as const;
 const TENURES = ["freehold", "strata", "leasehold"] as const;
 
-export default async function ListingsAdminPage() {
+export default async function ListingsAdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
+
   let user;
   try {
     user = await requirePermission("listing:create");
   } catch (error) {
-    if (error instanceof ForbiddenError) {
-      return (
-        <main>
-          <h1>My listings</h1>
-          <div className="card">
-            <p>Your role cannot create or manage listings.</p>
-            <p className="muted">
-              <Link href="/mls/dashboard">← Back to MLS Core</Link>
-            </p>
-          </div>
-        </main>
-      );
+    if (!(error instanceof ForbiddenError)) throw error;
+    try {
+      user = await requirePermission("listing:moderate");
+    } catch (error2) {
+      if (error2 instanceof ForbiddenError) {
+        return (
+          <main>
+            <h1>Listings</h1>
+            <div className="card">
+              <p>Your role cannot create or moderate listings.</p>
+              <p className="muted">
+                <Link href="/mls/dashboard">← Dashboard</Link>
+              </p>
+            </div>
+          </main>
+        );
+      }
+      throw error2;
     }
-    throw error;
+  }
+
+  // Admins (listing:moderate) get the read-only moderation registry;
+  // agents/brokers keep the authoring view below.
+  if (can(user.role, "listing:moderate")) {
+    return <ListingModeration status={status} />;
   }
 
   const seesAll = can(user.role, "listing:edit:office");

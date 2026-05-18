@@ -891,3 +891,33 @@ since it changes the Applications screen's success path.
   minimum 10 chars. Carried-open items unchanged (no email reset, no
   rate-limiting). The Applications success path is now real, so the Phase 5
   Admin workspace is unblocked for implementation.
+- **Phase 5 — Admin workspace: IMPLEMENTED (v1).** Built against the
+  approved design, reusing existing services/state machines only (no new
+  mutations invented). Delivered: the **workspace shell** — `mls/layout.tsx`
+  + client `WorkspaceFrame` (dark `--obsidian` rail + context bar, new
+  tokens only; Phase 2 public tokens untouched), permission-filtered nav
+  (an item hidden when its permission is absent), `Administrator` badge,
+  sign-out; pre-auth `/mls/login` + `/mls/activate` bypass the shell.
+  **Dashboard** — triage board: permission-aware stat cards linking to
+  filtered queues, "Needs you" oldest open applications, recent `auditLog`
+  strip, "nothing needs a decision" empty state. **Applications/Members** —
+  one route, two tabs; status filter chips; application metadata shown;
+  **corrected provisioning honesty** (approval now provisions a pending
+  account + admin-relayed activation link — no longer a dead end);
+  membership status-history timeline; mandatory audit note; destructive
+  account transitions gated by `ConfirmSubmit` (typed-confirmation for
+  `inactive`). **Compliance** — enforcement ladder as explicit steps with
+  per-issue action history; required notes; typed-confirmation for `removed`
+  ("REMOVE") and `account_terminated` ("TERMINATE"); required dismiss
+  reason. **Listings moderation** — read-only registry (all listings,
+  status chips, agent/price/updated, private-remarks + status/price-history
+  detail); guard relaxed so `listing:moderate` admins reach it (closes the
+  prior "moderate UI was a stub" risk) while agents keep authoring. Shared
+  `ConfirmSubmit` primitive added. Typecheck/lint/build green; 37 tests
+  pass. **Deliberately v1 / deferred (consistent with the design's stated
+  non-goals & risks):** detail drawers (used inline `<details>` instead),
+  global context-bar search, bulk actions (no bulk backend), full
+  responsive stacked-card table transform (tables scroll on the dark frame;
+  rail collapses at ≤860px), and manual issue-raising from Listings
+  (enforcement runs from Compliance — no manual-issue backend action
+  exists). These remain engineering dependencies, not faked UI.
