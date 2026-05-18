@@ -1,10 +1,16 @@
 # CIREME Design Plan — Visual Direction & UX Architecture
 
-> Companion to `CIREME_Development_Plan.md`. The development plan governs
-> engineering phases (0–10); this governs the **design track** (Design Phases
-> 1–10). They run in parallel: design phases feed the engineering UI work
-> (notably Dev Phase 7 public portal and the `/mls` workspaces). Authoritative
-> for visual and UX decisions; bound by the locked Phase 0 positioning and the
+> ⚠️ **SUPERSEDED — historical reference.** Design and development are now a
+> single track in **`governance/CIREME_Roadmap.md`**, which is authoritative
+> for all future work and holds the build ledger. This document is retained
+> only for its detailed Design Phase 1–5 specifications; do not plan new work
+> from its phase numbers. See the Roadmap crosswalk for how these phases map
+> onto the unified sequence.
+>
+> *(Original header, for context:)* Companion to `CIREME_Development_Plan.md`.
+> The development plan governs engineering phases (0–10); this governs the
+> **design track** (Design Phases 1–10). Authoritative for visual and UX
+> decisions; bound by the locked Phase 0 positioning and the
 > `governance/Positioning_Statement.md`.
 
 ## Working method
@@ -809,145 +815,9 @@ since it changes the Applications screen's success path.
 
 ---
 
-# OPEN-QUESTION RESOLUTIONS (implementation log)
+# Implementation log — MOVED
 
-- **Risk #1 — map/geodata: RESOLVED, then SUPERSEDED (see override below).**
-  Original decision: *district markers now, upgrade-ready*. No per-listing
-  coordinates; `src/data/cayman-districts.ts` held approximate district
-  centroids as the stable contract for a future precise-pin upgrade; a
-  tile-based slippy map was deliberately avoided to preserve the deployed CSP.
-- **OVERRIDE — precise pins + Google Maps (supersedes Risk #1 resolution and
-  Phase 1 non-negotiable #6 "must not loosen the CSP"). Decision approved by
-  the product owner.** Per-listing `latitude`/`longitude` columns added
-  (`numeric(10,7)`, nullable, migration `drizzle/0001`); classified **public**
-  in `listing-classification.ts` and projected by `toPublicListing` (the
-  governance gate tests were updated in lockstep). Agents drop a pin in the
-  listing create form (drag/click/"use my location"); the public Listings and
-  Listing Detail pages render Google Maps markers with a visitor "use my
-  location" control. **CSP deliberately loosened** in `next.config.ts`, scoped
-  to Google Maps origins only: `script-src`/`connect-src` +
-  `https://maps.googleapis.com https://maps.gstatic.com`,
-  `worker-src 'self' blob:`, `font-src` + `https://fonts.gstatic.com`. No
-  other third-party origin is permitted. `Permissions-Policy` also relaxed
-  from `geolocation=()` to `geolocation=(self)` (both `next.config.ts` and
-  `netlify.toml`) so the same-origin "use my location" control works; camera,
-  microphone and browsing-topics remain fully disabled. Migrations apply
-  automatically on deploy — `netlify.toml` already runs `npm run db:migrate`. Requires
-  `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional in `env.ts`; maps degrade to a
-  graceful keyless fallback — manual lat/lng entry for agents, a notice for
-  visitors — so build/test never require a key). Privacy/security note:
-  coordinates are intentionally coarse, surfaced as "approximate", and never
-  a substitute for the (still-private) Block & Parcel; the district-centroid
-  contract is retained for listings without a pin.
-- **Risk #2 — RPPI source: RESOLVED.** Official Cayman Government RPPI ingested
-  (`src/data/rppi.ts`); projection tool ships with the approved low–mid–high
-  band and mandated estimates-only disclaimer.
-- **Risk #8 — leads: RESOLVED.** Inquiries route to email + the existing
-  applications flow; no leads table introduced.
-- **Added:** Lands & Survey transaction-activity dataset (`src/data/las.ts`)
-  and a richer **Market intelligence** view (`/tools/market`) combining the
-  RPPI price index (per-region growth) with transaction volume/mix, with all
-  provider caveats surfaced. No new top-nav item (respects the
-  no-"Market Trends"-nav decision); reached via Tools.
-- **Data correction — LAS transaction volumes (2023–2026).** A reviewer
-  flagged the volume figures as off. Verified against the authoritative
-  `CIREME_data_2026_next` workbook: 2010–2022 were exact, but 2023–2025 had
-  been transcribed from an earlier *partial* export (2023 part-year; 2024/25
-  one-month stubs) and were materially understated (e.g. 2024 freehold
-  transfers 193 → **2,215**); 2026 was missing. Corrected 2023–2025 to full
-  12-month aggregates and added 2026 as an explicit **partial** year
-  (Jan–Apr, `partial: true`, `monthsCovered: 4`). `LasAnnualPoint` gained
-  optional `partial`/`monthsCovered`; `completeVolumeSeries()` now excludes
-  partial years by that flag (replacing a fragile <50%-of-prev magnitude
-  heuristic); the market view labels the partial year ("YYYY to date (N mo)")
-  and excludes it from the trend, mix and YoY. New test asserts no partial
-  year leaks into the complete series.
-- **Phase 4 — login: APPROVED & IMPLEMENTED.** `/mls/login` rebuilt to spec:
-  centered `--surface` card on `--canvas`, display-serif role-aware title and
-  eyebrow derived from the cosmetic `as` hint (admin/broker/agent; never
-  trusted for authorization — real role still drives redirect), show/hide
-  password, submit loading/disabled state, security-safe generic error
-  ("Email or password is incorrect, or the account isn't active yet."), an
-  honest "Trouble signing in?" disclosure (no self-serve reset — admin
-  restores access; pending applications explained), and a back-to-CIREME
-  link. The `as` hint is preserved across the error redirect. Nav Login
-  dropdown gained per-role one-line descriptors and menu roles. Open risks
-  carried unchanged: no email-based password reset, no rate limiting/lockout,
-  MFA out of scope (engineering dependencies, not designed-as-if-existing).
-  Phase 5 (Admin experience) is now unblocked.
-- **Phase 5 — Admin experience: APPROVED.** Design accepted as delivered
-  (workspace shell, admin home, Applications/Members, Listing moderation,
-  Compliance, read-only Audit over `auditLog`). Phase 6 (Broker experience)
-  is now unblocked and may proceed. Open direction still required before the
-  Admin workspace is *built in code*: the high risk that member approval does
-  not provision an account — this changes the Applications screen success
-  path and must be resolved before implementation, not before Phase 6 design.
-- **Account provisioning risk — RESOLVED & IMPLEMENTED.** Decision (product
-  owner): approval provisions a *pending* account; the member sets their own
-  password via a **single-use, 7-day, admin-relayed activation link**
-  (chosen over admin-set temp passwords and stub+reset). No email system
-  exists yet, so the admin copies the link from the Members screen and
-  delivers it out-of-band; email can replace the manual relay later with no
-  schema change. Implementation: `activation_tokens` table (migration
-  `drizzle/0002`, stores only a SHA-256 of the token — raw value lives only
-  in the link); `transitionApplication` now creates a pending `users` row +
-  pending membership with an unusable random password when no account exists
-  (pre-existing credentialed accounts keep the prior activate-immediately
-  path); `issueActivationToken`/`redeemActivationToken` (single-use + expiry
-  enforced in-transaction, prior tokens superseded on re-issue); public
-  `/mls/activate` set-password page (added to the auth-exempt list alongside
-  `/mls/login`); audit entries `account_provisioned`,
-  `activation_link_issued`, `account_activated`. **Role mapping** (recorded,
-  one-line change point in `membership-service.roleForMembershipType`):
-  `private_seller → agent`, `independent_broker → broker`,
-  `advertiser → advertiser`, mirroring the existing RBAC matrix. Password
-  minimum 10 chars. Carried-open items unchanged (no email reset, no
-  rate-limiting). The Applications success path is now real, so the Phase 5
-  Admin workspace is unblocked for implementation.
-- **Phase 5 — Admin workspace: IMPLEMENTED (v1).** Built against the
-  approved design, reusing existing services/state machines only (no new
-  mutations invented). Delivered: the **workspace shell** — `mls/layout.tsx`
-  + client `WorkspaceFrame` (dark `--obsidian` rail + context bar, new
-  tokens only; Phase 2 public tokens untouched), permission-filtered nav
-  (an item hidden when its permission is absent), `Administrator` badge,
-  sign-out; pre-auth `/mls/login` + `/mls/activate` bypass the shell.
-  **Dashboard** — triage board: permission-aware stat cards linking to
-  filtered queues, "Needs you" oldest open applications, recent `auditLog`
-  strip, "nothing needs a decision" empty state. **Applications/Members** —
-  one route, two tabs; status filter chips; application metadata shown;
-  **corrected provisioning honesty** (approval now provisions a pending
-  account + admin-relayed activation link — no longer a dead end);
-  membership status-history timeline; mandatory audit note; destructive
-  account transitions gated by `ConfirmSubmit` (typed-confirmation for
-  `inactive`). **Compliance** — enforcement ladder as explicit steps with
-  per-issue action history; required notes; typed-confirmation for `removed`
-  ("REMOVE") and `account_terminated` ("TERMINATE"); required dismiss
-  reason. **Listings moderation** — read-only registry (all listings,
-  status chips, agent/price/updated, private-remarks + status/price-history
-  detail); guard relaxed so `listing:moderate` admins reach it (closes the
-  prior "moderate UI was a stub" risk) while agents keep authoring. Shared
-  `ConfirmSubmit` primitive added. Typecheck/lint/build green; 37 tests
-  pass. **Deliberately v1 / deferred (consistent with the design's stated
-  non-goals & risks):** detail drawers (used inline `<details>` instead),
-  global context-bar search, bulk actions (no bulk backend), full
-  responsive stacked-card table transform (tables scroll on the dark frame;
-  rail collapses at ≤860px), and manual issue-raising from Listings
-  (enforcement runs from Compliance — no manual-issue backend action
-  exists). These remain engineering dependencies, not faked UI.
-- **Phase 3 Partner Application intake — IMPLEMENTED (closes the step 1→2
-  gap).** The application-intake form designed in Phase 3 (route
-  `/partners/apply`) is now built, so the approval→provision→activation
-  chain has a real public starting point (previously the only path into
-  `applications` was a DB seed; `/partners` was a `mailto`). Calm
-  multi-step form (Type → Details → Review) → `submitApplicationAction`
-  (zod-validated) → new `createApplication` service inserting a
-  `submitted` row with `{displayName, firm, message}` in
-  `applications.metadata` and an audit entry (`application_submitted`,
-  `actorId: null` — public, no auth). No account created at apply time
-  (per spec). Success screen states the application is recorded and an
-  admin will follow up. Partners CTA switched from `mailto:` to the form.
-  Spam: an off-screen honeypot field silently drops bot submissions (no
-  DB write, success-looking response). Carried risks unchanged: no
-  rate-limiting / IP throttling, no applicant-side status tracking
-  (admin-side only, Phase 5). Typecheck / lint / build green; 38 tests
-  pass.
+The "OPEN-QUESTION RESOLUTIONS (implementation log)" that lived here is now
+the **Build ledger** in `governance/CIREME_Roadmap.md`. All historical
+entries were moved verbatim; new build entries append there. This section is
+intentionally left as a pointer so older links don't dead-end.

@@ -1,10 +1,17 @@
 # CIREME Development Plan — Phased Roadmap
 
-> Consolidated execution table derived from the *MLS Expansion Roadmap* and its
-> Addendums, reflecting the **locked Phase 0 decision: Complement + Niche, no
-> compensation lock-in**. Estimates assume a small team (~2–3 engineers + 1
-> product/governance lead). Durations are planning estimates for sequencing,
-> not commitments.
+> ⚠️ **SUPERSEDED — historical reference.** Engineering and design are now a
+> single track in **`governance/CIREME_Roadmap.md`**, which is authoritative
+> for all future work. This document is retained for its original phase
+> definitions and exit criteria (still useful as detail behind the unified
+> phases — see the Roadmap crosswalk). Do not plan new work from its phase
+> numbers.
+>
+> *(Original intro:)* Consolidated execution table derived from the *MLS
+> Expansion Roadmap* and its Addendums, reflecting the **locked Phase 0
+> decision: Complement + Niche, no compensation lock-in**. Estimates assume a
+> small team (~2–3 engineers + 1 product/governance lead). Durations are
+> planning estimates for sequencing, not commitments.
 
 ## Phased roadmap
 
