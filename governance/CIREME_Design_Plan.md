@@ -849,6 +849,19 @@ since it changes the Applications screen's success path.
   RPPI price index (per-region growth) with transaction volume/mix, with all
   provider caveats surfaced. No new top-nav item (respects the
   no-"Market Trends"-nav decision); reached via Tools.
+- **Data correction — LAS transaction volumes (2023–2026).** A reviewer
+  flagged the volume figures as off. Verified against the authoritative
+  `CIREME_data_2026_next` workbook: 2010–2022 were exact, but 2023–2025 had
+  been transcribed from an earlier *partial* export (2023 part-year; 2024/25
+  one-month stubs) and were materially understated (e.g. 2024 freehold
+  transfers 193 → **2,215**); 2026 was missing. Corrected 2023–2025 to full
+  12-month aggregates and added 2026 as an explicit **partial** year
+  (Jan–Apr, `partial: true`, `monthsCovered: 4`). `LasAnnualPoint` gained
+  optional `partial`/`monthsCovered`; `completeVolumeSeries()` now excludes
+  partial years by that flag (replacing a fragile <50%-of-prev magnitude
+  heuristic); the market view labels the partial year ("YYYY to date (N mo)")
+  and excludes it from the trend, mix and YoY. New test asserts no partial
+  year leaks into the complete series.
 - **Phase 4 — login: APPROVED & IMPLEMENTED.** `/mls/login` rebuilt to spec:
   centered `--surface` card on `--canvas`, display-serif role-aware title and
   eyebrow derived from the cosmetic `as` hint (admin/broker/agent; never

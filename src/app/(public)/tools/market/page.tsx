@@ -5,6 +5,7 @@ import { LAS_CAVEAT, LAS_SOURCE } from "@/data/las";
 import {
   completeVolumeSeries,
   latestMix,
+  partialVolumeYear,
   regionGrowth,
 } from "@/lib/market-intel";
 
@@ -44,6 +45,7 @@ export default function MarketPage() {
   const vol = completeVolumeSeries().slice(-12);
   const vmax = Math.max(...vol.map((v) => v.freeholdTransfers));
   const mix = latestMix();
+  const partial = partialVolumeYear();
 
   return (
     <main>
@@ -194,6 +196,18 @@ export default function MarketPage() {
           </div>
         </div>
 
+        {partial ? (
+          <p
+            className="muted"
+            style={{ fontSize: "0.8rem", marginTop: "0.6rem" }}
+          >
+            {partial.year} to date ({partial.monthsCovered}&nbsp;mo):{" "}
+            {partial.freeholdTransfers.toLocaleString()} freehold transfers —{" "}
+            <strong>partial year</strong>, excluded from the trend and
+            year-over-year figures above.
+          </p>
+        ) : null}
+
         <div
           className="card"
           style={{
@@ -229,7 +243,8 @@ export default function MarketPage() {
           </div>
         </div>
         <p className="disclaimer" style={{ marginTop: "1rem" }}>
-          {LAS_CAVEAT} Source: {LAS_SOURCE}. A partial latest year is excluded.
+          {LAS_CAVEAT} Source: {LAS_SOURCE}. Partial (year-to-date) years are
+          excluded from the trend and mix.
         </p>
       </section>
     </main>

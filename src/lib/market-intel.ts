@@ -33,15 +33,14 @@ export function regionGrowth(region: RppiRegion): RegionGrowth {
   };
 }
 
-/** Annual LAS series with a partial trailing year removed (year-to-date). */
+/** Annual LAS series with any partial (year-to-date) year removed. */
 export function completeVolumeSeries(): LasAnnualPoint[] {
-  const a = [...LAS_ANNUAL];
-  const last = a[a.length - 1];
-  const prev = a[a.length - 2];
-  if (last && prev && last.freeholdTransfers < prev.freeholdTransfers * 0.5) {
-    a.pop();
-  }
-  return a;
+  return LAS_ANNUAL.filter((p) => !p.partial);
+}
+
+/** The trailing partial year, if the dataset currently has one. */
+export function partialVolumeYear(): LasAnnualPoint | undefined {
+  return LAS_ANNUAL.find((p) => p.partial);
 }
 
 /** Transaction-type mix (counts) for the latest complete year. */

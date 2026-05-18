@@ -3,7 +3,9 @@
  *
  * Source: Cayman Islands Government, Lands & Survey Department
  * (CIREME_data_2026 dataset). Annual aggregates of monthly figures,
- * 2010–2025. ALL monetary figures are in Cayman Islands dollars (CI$).
+ * 2010–2026. ALL monetary figures are in Cayman Islands dollars (CI$).
+ * 2026 is a PARTIAL year (Jan–Apr only); it carries `partial`/`monthsCovered`
+ * and is excluded from trend and year-over-year aggregations.
  *
  * Caveats (per the data provider, must be surfaced wherever shown):
  *  - "Number of Transfers" includes Transfers of Undivided Shares,
@@ -25,6 +27,10 @@ export type LasAnnualPoint = {
   leaseTransfersConsideration: number;
   purchaseAgreements: number;
   purchaseAgreementsConsideration: number;
+  /** True when the year is incomplete (year-to-date), not a full 12 months. */
+  partial?: boolean;
+  /** Months of data present when `partial` (e.g. 4 = Jan–Apr). */
+  monthsCovered?: number;
 };
 
 export const LAS_SOURCE =
@@ -49,7 +55,8 @@ export const LAS_ANNUAL: readonly LasAnnualPoint[] = [
   { year: 2020, freeholdTransfers: 1920, freeholdConsideration: 770561070.42, leases: 126, leasesConsideration: 14088516.62, leaseTransfers: 34, leaseTransfersConsideration: 23118239.89, purchaseAgreements: 677, purchaseAgreementsConsideration: 37479613.86 },
   { year: 2021, freeholdTransfers: 2983, freeholdConsideration: 1346455379.63, leases: 172, leasesConsideration: 14262200.32, leaseTransfers: 45, leaseTransfersConsideration: 52497782, purchaseAgreements: 90, purchaseAgreementsConsideration: 17397259.17 },
   { year: 2022, freeholdTransfers: 2659, freeholdConsideration: 1238367668.97, leases: 124, leasesConsideration: 11830142.3, leaseTransfers: 30, leaseTransfersConsideration: 17783709.08, purchaseAgreements: 70, purchaseAgreementsConsideration: 26519857.15 },
-  { year: 2023, freeholdTransfers: 1600, freeholdConsideration: 760521849.35, leases: 113, leasesConsideration: 16671722.82, leaseTransfers: 37, leaseTransfersConsideration: 36564001.08, purchaseAgreements: 42, purchaseAgreementsConsideration: 14881818.5 },
-  { year: 2024, freeholdTransfers: 193, freeholdConsideration: 84425460.4, leases: 21, leasesConsideration: 2334898.4, leaseTransfers: 5, leaseTransfersConsideration: 4767005, purchaseAgreements: 8, purchaseAgreementsConsideration: 2575800 },
-  { year: 2025, freeholdTransfers: 147, freeholdConsideration: 91138390.87, leases: 10, leasesConsideration: 348416.98, leaseTransfers: 0, leaseTransfersConsideration: 0, purchaseAgreements: 1, purchaseAgreementsConsideration: 475000 },
+  { year: 2023, freeholdTransfers: 2198, freeholdConsideration: 1079577043.68, leases: 171, leasesConsideration: 22882171.13, leaseTransfers: 47, leaseTransfersConsideration: 53135862.72, purchaseAgreements: 62, purchaseAgreementsConsideration: 26205451.08 },
+  { year: 2024, freeholdTransfers: 2215, freeholdConsideration: 1151272244.69, leases: 156, leasesConsideration: 17702957.94, leaseTransfers: 45, leaseTransfersConsideration: 84644868.9, purchaseAgreements: 61, purchaseAgreementsConsideration: 27043057.55 },
+  { year: 2025, freeholdTransfers: 2110, freeholdConsideration: 1275734707.56, leases: 181, leasesConsideration: 22449923.98, leaseTransfers: 40, leaseTransfersConsideration: 24612208.45, purchaseAgreements: 68, purchaseAgreementsConsideration: 56371659.8 },
+  { year: 2026, freeholdTransfers: 828, freeholdConsideration: 518311692.55, leases: 56, leasesConsideration: 4011113.52, leaseTransfers: 15, leaseTransfersConsideration: 13521023.36, purchaseAgreements: 55, purchaseAgreementsConsideration: 122657290.96, partial: true, monthsCovered: 4 },
 ];
