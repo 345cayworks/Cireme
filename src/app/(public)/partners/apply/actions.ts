@@ -25,6 +25,13 @@ export async function submitApplicationAction(
   _prev: ApplyState,
   formData: FormData,
 ): Promise<ApplyState> {
+  // Honeypot: a hidden field humans never see. If a bot fills it, silently
+  // accept (no DB write) so the bot can't learn it was filtered.
+  const honeypot = formData.get("website");
+  if (typeof honeypot === "string" && honeypot.trim() !== "") {
+    return { status: "ok" };
+  }
+
   const parsed = schema.safeParse({
     requestedType: formData.get("requestedType"),
     applicantEmail: formData.get("applicantEmail"),

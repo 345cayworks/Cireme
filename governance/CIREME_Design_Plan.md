@@ -946,6 +946,8 @@ since it changes the Applications screen's success path.
   `actorId: null` — public, no auth). No account created at apply time
   (per spec). Success screen states the application is recorded and an
   admin will follow up. Partners CTA switched from `mailto:` to the form.
-  Carried risks unchanged: no rate-limiting / spam protection, no
-  applicant-side status tracking (admin-side only, Phase 5). Typecheck /
-  lint / build green; 38 tests pass.
+  Spam: an off-screen honeypot field silently drops bot submissions (no
+  DB write, success-looking response). Carried risks unchanged: no
+  rate-limiting / IP throttling, no applicant-side status tracking
+  (admin-side only, Phase 5). Typecheck / lint / build green; 38 tests
+  pass.

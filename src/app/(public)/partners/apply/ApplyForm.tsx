@@ -92,6 +92,29 @@ export default function ApplyForm() {
       </ol>
 
       <form action={formAction} className="card">
+        {/* Honeypot — off-screen, not announced; only bots fill it. */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-9999px",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+          }}
+        >
+          <label>
+            Website
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              defaultValue=""
+            />
+          </label>
+        </div>
+
         {/* All inputs stay mounted so the final submit carries every field. */}
         <div hidden={step !== 0}>
           <h2 style={{ marginTop: 0 }}>What are you applying as?</h2>
