@@ -44,6 +44,7 @@ and are not re-opened except via a recorded override:
 | U# | Phase | Goal | Design + build deliverables | Depends on | Gate | Status |
 |---|---|---|---|---|---|---|
 | **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Delivered (v1) — awaiting approval** |
+| **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Delivered (v1) — awaiting approval** |
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | Pending |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | Pending |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
@@ -260,3 +261,27 @@ and can begin in parallel now.
   candidate for a later unified phase, not faked here). Typecheck / lint /
   build green; 38 tests pass. Follow-on once assignment exists: roster
   status actions and group analytics (deferred, no backend yet).
+- **U1b — Admin agent↔broker/office assignment: DELIVERED (v1), awaiting
+  approval.** Pulled forward from U1's flagged gap so the broker workspace
+  populates with real data. New audited mutation
+  `assignUserBrokerage({userId, brokerId, officeId, actorId})` in
+  `membership-service.ts` — the only production path that writes
+  `users.brokerId`/`users.officeId`. Validates: broker link must point at a
+  real `broker` account and not self; office link must exist; either may be
+  null (unassign). Audit entry `user_assignment_changed` (before/after).
+  Admin UI: per-member "Assign" controls on the Members tab (broker select +
+  office select + Save), gated on `member:approve`, via
+  `assignBrokerageAction`. No state-machine change. Closes the U1 honest
+  gap: My Agents / Group Listings / Brokerage now fill once an admin
+  assigns. Typecheck / lint / build green; 38 tests pass.
+- **Market intelligence — chart legends/readability.** Made the
+  `/tools/market` charts meaningful for a lay audience: price-index chart
+  gained a Y-axis scale (min/100/max), a dashed **2015 = 100 baseline**
+  with legend entry, X-axis year ticks, and per-region latest-value labels;
+  plain-language "higher = pricier vs 2015" framing. Volume chart gained a
+  Y-axis transfers scale (0–peak), mid/end year ticks, per-bar hover
+  tooltips (`<title>`), an axis caption, and a "each bar = a year of
+  registered ownership changes" explainer. Added a one-line glossary for
+  the transaction-mix terms (freehold transfer / lease / lease transfer /
+  purchase agreement). `role="img"` + `aria-label` on both SVGs. No data
+  change. Typecheck / lint / build green; 38 tests pass.

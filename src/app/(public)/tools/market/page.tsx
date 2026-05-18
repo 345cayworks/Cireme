@@ -34,6 +34,7 @@ export default function MarketPage() {
   ]);
   const min = Math.min(...all);
   const max = Math.max(...all);
+  const latest = RPPI_ANNUAL[RPPI_ANNUAL.length - 1]!;
 
   const line = (key: RppiRegion) =>
     RPPI_ANNUAL.map((p, i) => {
@@ -63,25 +64,73 @@ export default function MarketPage() {
       <section className="section">
         <h2>Residential price index ({y0}–{y1})</h2>
         <p className="muted" style={{ marginTop: "-0.5rem" }}>
-          Index, 2015 = 100 (condominiums).
+          Index, 2015 = 100 (condominiums). Higher means pricier than 2015 —
+          e.g. 200 = roughly double 2015 prices. Each line is a region; the
+          gold line is Cayman-wide.
         </p>
         <div className="card">
-          <svg
-            viewBox="0 0 100 40"
-            preserveAspectRatio="none"
-            style={{ width: "100%", height: 220 }}
-          >
-            {REGIONS.map((r) => (
-              <polyline
-                key={r.key}
-                points={line(r.key)}
-                fill="none"
-                stroke={r.stroke}
-                strokeWidth="1.5"
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {/* Y-axis scale */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                fontSize: "0.7rem",
+                color: "var(--meta)",
+                textAlign: "right",
+                minWidth: 28,
+                height: 220,
+              }}
+            >
+              <span>{Math.round(max)}</span>
+              <span>100</span>
+              <span>{Math.round(min)}</span>
+            </div>
+            <svg
+              viewBox="0 0 100 40"
+              preserveAspectRatio="none"
+              style={{ width: "100%", height: 220 }}
+              role="img"
+              aria-label={`Residential property price index by region, ${y0} to ${y1}, 2015 = 100`}
+            >
+              {/* 2015 = 100 baseline */}
+              <line
+                x1="0"
+                x2="100"
+                y1={38 - ((100 - min) / (max - min)) * 36}
+                y2={38 - ((100 - min) / (max - min)) * 36}
+                stroke="var(--n-300)"
+                strokeDasharray="2 2"
                 vectorEffect="non-scaling-stroke"
               />
-            ))}
-          </svg>
+              {REGIONS.map((r) => (
+                <polyline
+                  key={r.key}
+                  points={line(r.key)}
+                  fill="none"
+                  stroke={r.stroke}
+                  strokeWidth="1.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+              ))}
+            </svg>
+          </div>
+          {/* X-axis years */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: "0.7rem",
+              color: "var(--meta)",
+              margin: "0.3rem 0 0 36px",
+            }}
+          >
+            <span>{y0}</span>
+            <span>{years[Math.floor(years.length / 2)]}</span>
+            <span>{y1}</span>
+          </div>
+          {/* Legend with latest value per region */}
           <div
             style={{
               display: "flex",
@@ -91,6 +140,18 @@ export default function MarketPage() {
               fontSize: "0.85rem",
             }}
           >
+            <span style={{ color: "var(--meta)" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 16,
+                  borderTop: "1px dashed var(--n-400)",
+                  marginRight: 6,
+                  verticalAlign: "middle",
+                }}
+              />
+              2015 base (100)
+            </span>
             {REGIONS.map((r) => (
               <span key={r.key} style={{ color: "var(--n-700)" }}>
                 <span
@@ -103,7 +164,7 @@ export default function MarketPage() {
                     marginRight: 6,
                   }}
                 />
-                {r.label}
+                {r.label} · {latest[r.key].toFixed(0)} ({y1})
               </span>
             ))}
           </div>
@@ -159,41 +220,77 @@ export default function MarketPage() {
       <section className="section">
         <h2>Transaction activity</h2>
         <p className="muted" style={{ marginTop: "-0.5rem" }}>
-          Freehold transfers per year (Cayman-wide).
+          Each bar is one year of freehold transfers — registered ownership
+          changes Cayman-wide. Taller = a busier market that year.
         </p>
         <div className="card">
-          <svg
-            viewBox="0 0 100 36"
-            preserveAspectRatio="none"
-            style={{ width: "100%", height: 180 }}
-          >
-            {vol.map((v, i) => {
-              const bw = 100 / vol.length;
-              const h = (v.freeholdTransfers / vmax) * 32;
-              return (
-                <rect
-                  key={v.year}
-                  x={i * bw + bw * 0.15}
-                  y={34 - h}
-                  width={bw * 0.7}
-                  height={h}
-                  fill="var(--gold)"
-                />
-              );
-            })}
-          </svg>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {/* Y-axis: 0 to peak transfers */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                fontSize: "0.7rem",
+                color: "var(--meta)",
+                textAlign: "right",
+                minWidth: 34,
+                height: 180,
+              }}
+            >
+              <span>{vmax.toLocaleString()}</span>
+              <span>{Math.round(vmax / 2).toLocaleString()}</span>
+              <span>0</span>
+            </div>
+            <svg
+              viewBox="0 0 100 36"
+              preserveAspectRatio="none"
+              style={{ width: "100%", height: 180 }}
+              role="img"
+              aria-label={`Freehold transfers per year, ${vol[0]!.year} to ${vol[vol.length - 1]!.year}, peak ${vmax.toLocaleString()}`}
+            >
+              {vol.map((v, i) => {
+                const bw = 100 / vol.length;
+                const h = (v.freeholdTransfers / vmax) * 32;
+                return (
+                  <rect
+                    key={v.year}
+                    x={i * bw + bw * 0.15}
+                    y={34 - h}
+                    width={bw * 0.7}
+                    height={h}
+                    fill="var(--gold)"
+                  >
+                    <title>
+                      {v.year}: {v.freeholdTransfers.toLocaleString()} freehold
+                      transfers
+                    </title>
+                  </rect>
+                );
+              })}
+            </svg>
+          </div>
+          {/* X-axis years */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              fontSize: "0.75rem",
+              fontSize: "0.7rem",
               color: "var(--meta)",
-              marginTop: "0.4rem",
+              margin: "0.4rem 0 0 42px",
             }}
           >
             <span>{vol[0]!.year}</span>
+            <span>{vol[Math.floor(vol.length / 2)]!.year}</span>
             <span>{vol[vol.length - 1]!.year}</span>
           </div>
+          <p
+            className="muted"
+            style={{ fontSize: "0.75rem", margin: "0.5rem 0 0 42px" }}
+          >
+            Y-axis: transfers per year (0–{vmax.toLocaleString()}). Hover a bar
+            for the exact count.
+          </p>
         </div>
 
         {partial ? (
@@ -242,6 +339,13 @@ export default function MarketPage() {
             <strong>{mix.purchaseAgreements.toLocaleString()}</strong>
           </div>
         </div>
+        <p className="muted" style={{ fontSize: "0.78rem", marginTop: "0.5rem" }}>
+          <strong>Freehold transfers</strong>: ownership sold/changed.{" "}
+          <strong>Leases</strong>: new long-term leases granted.{" "}
+          <strong>Lease transfers</strong>: existing leases reassigned.{" "}
+          <strong>Purchase agreements</strong>: sales contracted but not yet
+          completed.
+        </p>
         <p className="disclaimer" style={{ marginTop: "1rem" }}>
           {LAS_CAVEAT} Source: {LAS_SOURCE}. Partial (year-to-date) years are
           excluded from the trend and mix.

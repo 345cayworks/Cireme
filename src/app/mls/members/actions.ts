@@ -7,9 +7,44 @@ import { z } from "zod";
 import { ActivationError, issueActivationToken } from "@/lib/activation-service";
 import { requirePermission } from "@/lib/auth-guard";
 import {
+  assignUserBrokerage,
   transitionApplication,
   transitionMembershipStatus,
 } from "@/lib/membership-service";
+
+const optionalUuid = z
+  .string()
+  .uuid()
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
+const assignSchema = z.object({
+  userId: z.string().uuid(),
+  brokerId: optionalUuid,
+  officeId: optionalUuid,
+});
+
+export async function assignBrokerageAction(formData: FormData) {
+  const admin = await requirePermission("member:approve");
+  const parsed = assignSchema.safeParse({
+    userId: formData.get("userId"),
+    brokerId: formData.get("brokerId") || "",
+    officeId: formData.get("officeId") || "",
+  });
+  if (!parsed.success) return;
+  try {
+    await assignUserBrokerage({
+      userId: parsed.data.userId,
+      brokerId: parsed.data.brokerId ?? null,
+      officeId: parsed.data.officeId ?? null,
+      actorId: admin.id,
+    });
+  } catch {
+    // Validation failures (bad broker/office) are surfaced by re-render;
+    // no partial write occurs (single transaction).
+  }
+  revalidatePath("/mls/members");
+}
 
 const applicationSchema = z.object({
   applicationId: z.string().uuid(),

@@ -18,6 +18,7 @@ import {
   auditLog,
   membershipStatusHistory,
   memberships,
+  offices,
   users,
 } from "@/db/schema";
 
@@ -191,6 +192,69 @@ export async function createApplication(input: {
       },
     });
     return created!;
+  });
+}
+
+/**
+ * Assigns (or clears) a user's managing broker and/or office. The only
+ * production path that sets `users.brokerId`/`users.officeId`; admin-only at
+ * the call site. Audited; validated so a broker link points at a real
+ * `broker` account and an office link at a real office.
+ */
+export async function assignUserBrokerage(params: {
+  userId: string;
+  brokerId: string | null;
+  officeId: string | null;
+  actorId: string;
+}) {
+  const { userId, brokerId, officeId, actorId } = params;
+  return db.transaction(async (tx: Tx) => {
+    const [target] = await tx
+      .select({
+        id: users.id,
+        brokerId: users.brokerId,
+        officeId: users.officeId,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    if (!target) throw new Error("User not found");
+
+    if (brokerId) {
+      if (brokerId === userId) {
+        throw new Error("A user cannot be their own broker");
+      }
+      const [b] = await tx
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, brokerId))
+        .limit(1);
+      if (!b || b.role !== "broker") {
+        throw new Error("Assigned broker must be a broker account");
+      }
+    }
+    if (officeId) {
+      const [o] = await tx
+        .select({ id: offices.id })
+        .from(offices)
+        .where(eq(offices.id, officeId))
+        .limit(1);
+      if (!o) throw new Error("Office not found");
+    }
+
+    const now = new Date();
+    await tx
+      .update(users)
+      .set({ brokerId, officeId, updatedAt: now })
+      .where(eq(users.id, userId));
+    await tx.insert(auditLog).values({
+      actorId,
+      entity: "user",
+      entityId: userId,
+      action: "user_assignment_changed",
+      before: { brokerId: target.brokerId, officeId: target.officeId },
+      after: { brokerId, officeId },
+    });
   });
 }
 

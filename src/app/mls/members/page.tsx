@@ -7,6 +7,7 @@ import {
   applications,
   membershipStatusHistory,
   memberships,
+  offices,
   users,
 } from "@/db/schema";
 import {
@@ -17,6 +18,7 @@ import {
 import { ForbiddenError, requirePermission } from "@/lib/auth-guard";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import {
+  assignBrokerageAction,
   membershipStatusAction,
   reviewApplicationAction,
 } from "./actions";
@@ -255,6 +257,7 @@ async function MembersTab(status?: string) {
       displayName: users.displayName,
       role: users.role,
       officeId: users.officeId,
+      brokerId: users.brokerId,
     })
     .from(memberships)
     .leftJoin(users, eq(users.id, memberships.userId))
@@ -276,6 +279,21 @@ async function MembersTab(status?: string) {
     list.push(h);
     historyByMembership.set(h.membershipId, list);
   }
+
+  // Assignment options: broker accounts and offices.
+  const [brokerOpts, officeOpts] = await Promise.all([
+    db
+      .select({ id: users.id, name: users.displayName })
+      .from(users)
+      .where(eq(users.role, "broker"))
+      .orderBy(users.displayName)
+      .limit(500),
+    db
+      .select({ id: offices.id, name: offices.name })
+      .from(offices)
+      .orderBy(offices.name)
+      .limit(500),
+  ]);
 
   return (
     <>
@@ -334,6 +352,53 @@ async function MembersTab(status?: string) {
                     <ActivationLink userId={m.userId} />
                   </div>
                 ) : null}
+
+                <form
+                  action={assignBrokerageAction}
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    marginTop: "0.75rem",
+                  }}
+                >
+                  <input type="hidden" name="userId" value={m.userId} />
+                  <span className="muted" style={{ fontSize: "0.85rem" }}>
+                    Assign:
+                  </span>
+                  <select
+                    name="brokerId"
+                    defaultValue={m.brokerId ?? ""}
+                    aria-label="Managing broker"
+                    style={{ margin: 0, maxWidth: 220 }}
+                  >
+                    <option value="">— no broker —</option>
+                    {brokerOpts
+                      .filter((b) => b.id !== m.userId)
+                      .map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    name="officeId"
+                    defaultValue={m.officeId ?? ""}
+                    aria-label="Office"
+                    style={{ margin: 0, maxWidth: 220 }}
+                  >
+                    <option value="">— no office —</option>
+                    {officeOpts.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button type="submit" className="btn-outline">
+                    Save assignment
+                  </button>
+                </form>
 
                 {rowHistory.length > 0 ? (
                   <ul className="timeline" style={{ marginTop: "0.75rem" }}>
