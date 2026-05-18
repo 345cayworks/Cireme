@@ -14,6 +14,9 @@ const NAV: { label: string; href: string; need?: Permission }[] = [
   { label: "Applications", href: "/mls/members?tab=applications", need: "member:approve" },
   { label: "Members", href: "/mls/members?tab=members", need: "member:approve" },
   { label: "Listings", href: "/mls/listings", need: "listing:moderate" },
+  { label: "My agents", href: "/mls/agents", need: "listing:edit:office" },
+  { label: "Group listings", href: "/mls/group-listings", need: "listing:edit:office" },
+  { label: "Brokerage", href: "/mls/brokerage", need: "listing:edit:office" },
   { label: "Compliance", href: "/mls/compliance", need: "compliance:review" },
   { label: "Audit", href: "/mls/audit", need: "platform:admin" },
 ];

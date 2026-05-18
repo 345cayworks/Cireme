@@ -43,7 +43,7 @@ and are not re-opened except via a recorded override:
 
 | U# | Phase | Goal | Design + build deliverables | Depends on | Gate | Status |
 |---|---|---|---|---|---|---|
-| **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Pending — next** |
+| **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Delivered (v1) — awaiting approval** |
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | Pending |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | Pending |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
@@ -240,3 +240,23 @@ and can begin in parallel now.
   U1–U7 + closed foundation). The former plans are retained as historical
   reference with a superseded banner; this document is now authoritative for
   all future work, and the build ledger lives here.
+- **U1 — Broker experience: DELIVERED (v1), awaiting approval.** Design +
+  build bundled to one gate (unified-track method). Added three
+  broker-scoped surfaces in the existing workspace shell, rail items gated
+  on `listing:edit:office` (so `broker`/`office_manager`, and `super_admin`,
+  see them; `mls_admin`/`agent` do not): **My agents** (roster — users whose
+  `brokerId` is this user, or who share their `officeId`), **Group listings**
+  (read-only registry of listings authored by the roster or carrying the
+  office, status-chip filtered; edits intentionally stay in `/mls/listings`
+  where brokers already hold office-edit rights — no duplicate mutation),
+  **Brokerage profile** (read-only `offices` row). New read-only helpers
+  `current-user.ts` (`getCurrentUser` — session lacks `brokerId`/`officeId`,
+  so one DB lookup) and `broker-service.ts` (`listRoster`,
+  `listGroupListings`, `getBrokerageOffice`). **No new mutations, no
+  state-machine changes.** Honest empty states: because no production flow
+  sets `users.brokerId`/`officeId` yet, these scopes are empty for real
+  data; each surface says so plainly and names agent↔broker/office
+  assignment as the engineering dependency (an admin-assignment flow — a
+  candidate for a later unified phase, not faked here). Typecheck / lint /
+  build green; 38 tests pass. Follow-on once assignment exists: roster
+  status actions and group analytics (deferred, no backend yet).
