@@ -17,9 +17,9 @@ approved here.
 |---|---|---|
 | 1 | Visual strategy + UX foundation | **Approved** |
 | 2 | Design system foundation | **Approved** |
-| 3 | Public experience design | **Approved** |
+| 3 | Public experience design | **Approved — partially implemented** |
 | 4 | Login + role entry | **Approved — implemented to spec** |
-| 5 | Admin experience | **Delivered — awaiting approval** |
+| 5 | Admin experience | **Approved — implemented (v1)** |
 | 6 | Broker experience | Pending |
 | 7 | Agent experience | Pending |
 | 8 | Tools experience | Pending |
