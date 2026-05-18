@@ -862,3 +862,10 @@ since it changes the Applications screen's success path.
   carried unchanged: no email-based password reset, no rate limiting/lockout,
   MFA out of scope (engineering dependencies, not designed-as-if-existing).
   Phase 5 (Admin experience) is now unblocked.
+- **Phase 5 — Admin experience: APPROVED.** Design accepted as delivered
+  (workspace shell, admin home, Applications/Members, Listing moderation,
+  Compliance, read-only Audit over `auditLog`). Phase 6 (Broker experience)
+  is now unblocked and may proceed. Open direction still required before the
+  Admin workspace is *built in code*: the high risk that member approval does
+  not provision an account — this changes the Applications screen success
+  path and must be resolved before implementation, not before Phase 6 design.
