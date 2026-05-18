@@ -43,8 +43,8 @@ and are not re-opened except via a recorded override:
 
 | U# | Phase | Goal | Design + build deliverables | Depends on | Gate | Status |
 |---|---|---|---|---|---|---|
-| **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Delivered (v1) — awaiting approval** |
-| **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Delivered (v1) — awaiting approval** |
+| **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Approved — implemented (v1)** |
+| **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Approved — implemented (v1)** |
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | Pending |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | Pending |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
@@ -285,3 +285,8 @@ and can begin in parallel now.
   the transaction-mix terms (freehold transfer / lease / lease transfer /
   purchase agreement). `role="img"` + `aria-label` on both SVGs. No data
   change. Typecheck / lint / build green; 38 tests pass.
+- **U1 + U1b — APPROVED.** Product owner approved the broker workspace and
+  the admin assignment flow as delivered (v1). Permission/negative tests
+  remain a noted follow-up (consistent with the repo's existing no-DB-test
+  pattern for page/query code), not a blocker for approval. U2 (Agent
+  experience) is now the active phase on the critical path.
