@@ -161,6 +161,39 @@ export async function setUserAccountStatus(params: {
  * the user account is activated. User provisioning/credentials are out of
  * scope for this service.
  */
+/**
+ * Creates a new partner/membership application (public, no auth). No account
+ * is created at apply time — that happens only on admin approval.
+ */
+export async function createApplication(input: {
+  applicantEmail: string;
+  requestedType: (typeof memberships.$inferInsert)["type"];
+  metadata: Record<string, unknown>;
+}) {
+  return db.transaction(async (tx: Tx) => {
+    const [created] = await tx
+      .insert(applications)
+      .values({
+        applicantEmail: input.applicantEmail,
+        requestedType: input.requestedType,
+        status: "submitted",
+        metadata: input.metadata,
+      })
+      .returning();
+    await tx.insert(auditLog).values({
+      actorId: null,
+      entity: "application",
+      entityId: created!.id,
+      action: "application_submitted",
+      after: {
+        requestedType: input.requestedType,
+        status: "submitted",
+      },
+    });
+    return created!;
+  });
+}
+
 export async function transitionApplication(params: {
   applicationId: string;
   toStatus: ApplicationStatus;

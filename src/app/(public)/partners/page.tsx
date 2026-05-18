@@ -1,14 +1,9 @@
+import type { Route } from "next";
+import Link from "next/link";
+
 export const metadata = { title: "Partners — CIREME" };
 
-const APPLY_EMAIL = "info@cayworks.com";
-
 export default function PartnersPage() {
-  const mailto = `mailto:${APPLY_EMAIL}?subject=${encodeURIComponent(
-    "CIREME membership application",
-  )}&body=${encodeURIComponent(
-    "Type (private seller / independent broker / advertiser):\nName:\nFirm/brokerage (if any):\nMessage:",
-  )}`;
-
   return (
     <main>
       <p className="eyebrow">Join CIREME</p>
@@ -56,9 +51,9 @@ export default function PartnersPage() {
             Send your details and the team will follow up.
           </div>
         </div>
-        <a href={mailto} className="btn">
+        <Link href={"/partners/apply" as Route} className="btn">
           Apply to join
-        </a>
+        </Link>
       </div>
     </main>
   );

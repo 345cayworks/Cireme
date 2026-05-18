@@ -934,3 +934,18 @@ since it changes the Applications screen's success path.
   rail collapses at ≤860px), and manual issue-raising from Listings
   (enforcement runs from Compliance — no manual-issue backend action
   exists). These remain engineering dependencies, not faked UI.
+- **Phase 3 Partner Application intake — IMPLEMENTED (closes the step 1→2
+  gap).** The application-intake form designed in Phase 3 (route
+  `/partners/apply`) is now built, so the approval→provision→activation
+  chain has a real public starting point (previously the only path into
+  `applications` was a DB seed; `/partners` was a `mailto`). Calm
+  multi-step form (Type → Details → Review) → `submitApplicationAction`
+  (zod-validated) → new `createApplication` service inserting a
+  `submitted` row with `{displayName, firm, message}` in
+  `applications.metadata` and an audit entry (`application_submitted`,
+  `actorId: null` — public, no auth). No account created at apply time
+  (per spec). Success screen states the application is recorded and an
+  admin will follow up. Partners CTA switched from `mailto:` to the form.
+  Carried risks unchanged: no rate-limiting / spam protection, no
+  applicant-side status tracking (admin-side only, Phase 5). Typecheck /
+  lint / build green; 38 tests pass.
