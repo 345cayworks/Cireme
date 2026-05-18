@@ -9,6 +9,7 @@ import {
   membershipStatusAction,
   reviewApplicationAction,
 } from "./actions";
+import ActivationLink from "./ActivationLink";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,21 @@ export default async function MembersPage() {
                   {m.type} · status: {m.status}
                 </span>
               </div>
+              {m.status === "pending" ? (
+                <div
+                  style={{
+                    marginTop: "0.5rem",
+                    paddingBottom: "0.5rem",
+                    borderBottom: "1px solid var(--n-200, #eee)",
+                  }}
+                >
+                  <span className="muted" style={{ fontSize: "0.85rem" }}>
+                    Awaiting activation — relay a set-password link to the
+                    member.
+                  </span>
+                  <ActivationLink userId={m.userId} />
+                </div>
+              ) : null}
               <form
                 action={membershipStatusAction}
                 style={{

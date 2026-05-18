@@ -7,7 +7,10 @@
  * requirePermission("member:approve"); this layer trusts its actorId, like the
  * listing and compliance services.
  */
+import { randomBytes } from "node:crypto";
+
 import { eq } from "drizzle-orm";
+import { hash } from "bcryptjs";
 
 import { db } from "@/db";
 import {
@@ -17,6 +20,27 @@ import {
   memberships,
   users,
 } from "@/db/schema";
+
+type MembershipType = (typeof memberships.$inferInsert)["type"];
+type UserRole = (typeof users.$inferInsert)["role"];
+
+/**
+ * The role an approved applicant's account is provisioned with. Mirrors the
+ * existing RBAC matrix (rbac.ts): a private seller needs only own-listing
+ * rights (= agent), an independent broker needs office-listing rights
+ * (= broker), an advertiser has no MLS access (= advertiser). Changing
+ * product intent here is a one-line, audited decision.
+ */
+export function roleForMembershipType(type: MembershipType): UserRole {
+  switch (type) {
+    case "independent_broker":
+      return "broker";
+    case "advertiser":
+      return "advertiser";
+    case "private_seller":
+      return "agent";
+  }
+}
 import {
   AccountTransitionError,
   ApplicationTransitionError,
@@ -171,15 +195,16 @@ export async function transitionApplication(params: {
       .returning();
 
     if (toStatus === "approved") {
-      const [user] = await tx
+      const [existing] = await tx
         .select({ id: users.id })
         .from(users)
         .where(eq(users.email, application.applicantEmail))
         .limit(1);
 
-      if (user) {
+      if (existing) {
+        // Account already exists (and has credentials) — activate it now.
         await tx.insert(memberships).values({
-          userId: user.id,
+          userId: existing.id,
           type: application.requestedType,
           status: "active",
           approvedBy: actorId,
@@ -188,7 +213,46 @@ export async function transitionApplication(params: {
         await tx
           .update(users)
           .set({ status: "active", updatedAt: now })
-          .where(eq(users.id, user.id));
+          .where(eq(users.id, existing.id));
+      } else {
+        // Provision a *pending* account with an unusable random password.
+        // The member sets their own password by redeeming an activation
+        // link (admin-relayed); only then do account + membership go active.
+        const metadata = (application.metadata ?? {}) as {
+          displayName?: unknown;
+        };
+        const displayName =
+          typeof metadata.displayName === "string" &&
+          metadata.displayName.trim()
+            ? metadata.displayName.trim()
+            : application.applicantEmail.split("@")[0]!;
+        const unusable = await hash(randomBytes(32).toString("base64url"), 12);
+
+        const [created] = await tx
+          .insert(users)
+          .values({
+            email: application.applicantEmail,
+            passwordHash: unusable,
+            displayName,
+            role: roleForMembershipType(application.requestedType),
+            status: "pending",
+          })
+          .returning({ id: users.id });
+
+        await tx.insert(memberships).values({
+          userId: created!.id,
+          type: application.requestedType,
+          status: "pending",
+          approvedBy: actorId,
+          approvedAt: now,
+        });
+        await tx.insert(auditLog).values({
+          actorId,
+          entity: "user",
+          entityId: created!.id,
+          action: "account_provisioned",
+          after: { status: "pending", role: roleForMembershipType(application.requestedType) },
+        });
       }
     }
 

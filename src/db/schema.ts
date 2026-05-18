@@ -155,6 +155,23 @@ export const memberships = pgTable("memberships", {
   ...timestamps,
 });
 
+// Single-use, expiring account-activation tokens. Created when admin approval
+// provisions a new pending account; redeemed once by the member to set their
+// own password. Only a SHA-256 hash of the token is stored — the raw value
+// lives only in the admin-relayed activation link, never in the database.
+export const activationTokens = pgTable("activation_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const membershipStatusHistory = pgTable("membership_status_history", {
   id: uuid("id").primaryKey().defaultRandom(),
   membershipId: uuid("membership_id")

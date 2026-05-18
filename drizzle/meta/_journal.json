@@ -15,6 +15,13 @@
       "when": 1779051586883,
       "tag": "0001_sleepy_captain_midlands",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779065301964,
+      "tag": "0002_thin_whizzer",
+      "breakpoints": true
     }
   ]
 }

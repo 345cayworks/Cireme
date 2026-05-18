@@ -32,9 +32,11 @@ export const authConfig = {
       return session;
     },
     authorized({ auth, request }) {
+      const path = request.nextUrl.pathname;
       const isMlsArea =
-        request.nextUrl.pathname.startsWith("/mls") &&
-        request.nextUrl.pathname !== "/mls/login";
+        path.startsWith("/mls") &&
+        path !== "/mls/login" &&
+        path !== "/mls/activate";
       if (!isMlsArea) return true;
       const role = auth?.user?.role as Role | undefined;
       return Boolean(auth) && isMlsRole(role);

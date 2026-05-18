@@ -869,3 +869,25 @@ since it changes the Applications screen's success path.
   Admin workspace is *built in code*: the high risk that member approval does
   not provision an account — this changes the Applications screen success
   path and must be resolved before implementation, not before Phase 6 design.
+- **Account provisioning risk — RESOLVED & IMPLEMENTED.** Decision (product
+  owner): approval provisions a *pending* account; the member sets their own
+  password via a **single-use, 7-day, admin-relayed activation link**
+  (chosen over admin-set temp passwords and stub+reset). No email system
+  exists yet, so the admin copies the link from the Members screen and
+  delivers it out-of-band; email can replace the manual relay later with no
+  schema change. Implementation: `activation_tokens` table (migration
+  `drizzle/0002`, stores only a SHA-256 of the token — raw value lives only
+  in the link); `transitionApplication` now creates a pending `users` row +
+  pending membership with an unusable random password when no account exists
+  (pre-existing credentialed accounts keep the prior activate-immediately
+  path); `issueActivationToken`/`redeemActivationToken` (single-use + expiry
+  enforced in-transaction, prior tokens superseded on re-issue); public
+  `/mls/activate` set-password page (added to the auth-exempt list alongside
+  `/mls/login`); audit entries `account_provisioned`,
+  `activation_link_issued`, `account_activated`. **Role mapping** (recorded,
+  one-line change point in `membership-service.roleForMembershipType`):
+  `private_seller → agent`, `independent_broker → broker`,
+  `advertiser → advertiser`, mirroring the existing RBAC matrix. Password
+  minimum 10 chars. Carried-open items unchanged (no email reset, no
+  rate-limiting). The Applications success path is now real, so the Phase 5
+  Admin workspace is unblocked for implementation.
