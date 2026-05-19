@@ -15,6 +15,7 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
     "db:bootstrap-admin": "tsx src/db/bootstrap-superadmin.ts",
+    "db:drill-snapshot": "tsx src/db/drill-snapshot.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

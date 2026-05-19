@@ -15,3 +15,6 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 coverage
 .drizzle
+
+# Backup/restore drill local artifacts (never commit DB snapshots)
+governance/drill-*.json

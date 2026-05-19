@@ -24,16 +24,25 @@
 
 ## Drill procedure (staging, [OWNER] to execute)
 
-1. Snapshot current row counts: `users`, `applications`, `memberships`,
-   `listings`, `listingMedia`, `auditLog`.
+1. Snapshot current row counts against the **source** DB (read-only, no
+   writes):
+   `DATABASE_URL=<source> npm run db:drill-snapshot -- snapshot governance/drill-before.json`
+   (covers `users`, `applications`, `memberships`, `listings`,
+   `listingMedia`, `complianceIssues`, `complianceActions`, `auditLog`).
 2. Create a fresh Neon branch/restore point from the latest backup (or PITR
    to T-1h).
 3. Point a staging deploy at the restored DB; run `npm run db:migrate`
    (idempotent) and start the app.
-4. Verify: login works; a known listing renders publicly; admin dashboard
-   counts match the pre-drill snapshot within RPO; audit log intact
-   (append-only, no truncation).
-5. Record elapsed wall-clock time (start of step 2 → service verified).
+4. Verify:
+   - Machine check (read-only) against the **restored** DB:
+     `DATABASE_URL=<restored> npm run db:drill-snapshot -- verify governance/drill-before.json`
+     — exits non-zero if any table fell below the RPO tolerance
+     (`DRILL_RPO_TOLERANCE`, default 0) or if `auditLog` lost any rows
+     (append-only integrity). Do **not** commit the `drill-before.json`
+     snapshot (it is a local drill artifact).
+   - Manual check: login works; a known listing renders publicly; admin
+     dashboard counts look right.
+5. Record elapsed wall-clock time (start of step 2 → step 4 verified).
 
 ## Result log
 

@@ -474,3 +474,14 @@ and can begin in parallel now.
   counsel-review drafts and the U7 sign-off + licence/entity/processor/
   region confirmations stay launch-blocking and owner-accepted under the
   recorded waiver. No code change.
+- **U7 backup/restore drill — made executable & machine-verifiable (NOT
+  executed).** Added a strictly read-only `npm run db:drill-snapshot`
+  (`src/db/drill-snapshot.ts`): `snapshot` records row counts on the
+  source; `verify` re-counts the restored DB and exits non-zero if any
+  table falls below the RPO tolerance or if `auditLog` lost any rows
+  (append-only integrity is now machine-checked, not prose). Wired into
+  `Backup_Restore_Drill.md` steps 1/4; local snapshot artifacts
+  git-ignored. The build agent still does NOT and cannot run a live
+  backup/restore against production — the drill remains an unexecuted
+  [OWNER] task and the U7 DR risk stays owner-accepted under the recorded
+  waiver. typecheck/lint/build/57 tests green.
