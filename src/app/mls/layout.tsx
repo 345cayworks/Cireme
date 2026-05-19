@@ -11,6 +11,7 @@ async function signOutAction() {
 
 const NAV: { label: string; href: string; need?: Permission }[] = [
   { label: "Dashboard", href: "/mls/dashboard" },
+  { label: "Cooperation", href: "/mls/cooperation" },
   { label: "Applications", href: "/mls/members?tab=applications", need: "member:approve" },
   { label: "Members", href: "/mls/members?tab=members", need: "member:approve" },
   { label: "Listings", href: "/mls/listings", need: "listing:moderate" },
