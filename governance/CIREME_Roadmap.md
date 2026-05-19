@@ -45,7 +45,7 @@ and are not re-opened except via a recorded override:
 |---|---|---|---|---|---|---|
 | **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Approved — implemented (v1)** |
 | **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Approved — implemented (v1)** |
-| **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Delivered (v1) — awaiting approval** |
+| **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Approved — implemented (v1)** |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | Pending |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
@@ -322,3 +322,7 @@ and can begin in parallel now.
   after setting their password. Added a success banner ("Your account is
   activated. You can now sign in.") shown when `activated=1`. No other
   change. Typecheck / lint / build green; 38 tests pass.
+- **U2 — APPROVED.** Product owner approved the agent experience as
+  delivered (v1). CSV import remains a deferred optional follow-on; authoring
+  automated tests remain a noted non-blocking follow-up. U3 (Cooperation &
+  member-only data) is now the active phase on the critical path.
