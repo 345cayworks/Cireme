@@ -50,7 +50,7 @@ and are not re-opened except via a recorded override:
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | **Approved — implemented (v1)** |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
 | **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | Pending |
-| **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **In progress — artifacts delivered; [OWNER] sign-off/drill outstanding (legal-blocking)** |
+| **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **Approved (OWNER WAIVER) — counsel review & restore drill NOT performed; residual legal/DR risk accepted by owner** |
 
 **Critical path:** U1 → U2 → U3 → U6 → U7. U4 and U5 run off the critical
 path. U7's counsel-review item (formerly Dev 0b) is legal-blocking for launch
@@ -383,3 +383,15 @@ and can begin in parallel now.
   documents and the DPA analysis can proceed in parallel. No code change.
 - **U4 — APPROVED.** Product owner approved search & market analytics as
   delivered (v1). U6 is now fully unblocked (depends on U2 ✓ and U4 ✓).
+- **U7 — APPROVED BY OWNER WAIVER (residual risk accepted).** The product
+  owner elected to fully approve U7 and **waive the gate**, explicitly
+  accepting that the two launch-blocking exit items were **NOT performed**:
+  (1) counsel sign-off on the membership agreement, AUP, privacy policy and
+  DPA off-island-transfer basis; (2) a passing backup/restore drill within
+  RTO. This is a recorded owner decision, not a completed control — the
+  build agent did not and cannot perform legal review or a live DR drill.
+  Residual risk knowingly carried into launch: operating without legal
+  review of member-facing/legal terms and without a verified disaster-
+  recovery restore. `Legal_Review_Status.md` and `Backup_Restore_Drill.md`
+  remain open and should still be closed post-haste; this waiver does not
+  make them done. No code change.
