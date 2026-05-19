@@ -446,3 +446,15 @@ and can begin in parallel now.
   performed; residual legal/DR risk remains explicitly owner-accepted.
   `Legal_Review_Status.md` and `Backup_Restore_Drill.md` stay open. No
   code change in this step (governance/sign-off only).
+- **U7 legal drafting — DRAFTS PREPARED (not sign-off).** Four counsel-
+  review drafts written under `governance/legal/` (Membership Agreement,
+  AUP, Privacy Policy, off-island transfer-basis question set) plus a
+  `Counsel_Review_Cover_Note.md` indexing them, the binding product
+  constraints counsel must preserve, every `[BRACKET]` decision left for
+  counsel/owner, and the open legal questions (off-island transfer basis;
+  immutable audit log vs. erasure rights; member controller/processor
+  allocation). All marked "DRAFT — NOT LEGAL ADVICE"; the build agent did
+  not and cannot give legal advice or sign-off. `Legal_Review_Status.md`
+  updated: drafts ✅, counsel status still ☐ pending. This does NOT close
+  the U7 legal item — sign-off remains the owner action and the residual
+  risk stays owner-accepted under the recorded waiver. No code change.

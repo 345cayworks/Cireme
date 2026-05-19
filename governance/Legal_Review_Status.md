@@ -21,21 +21,27 @@
 
 | Document | Purpose | Draft exists? | Counsel status |
 |---|---|---|---|
-| Membership Agreement | Member/broker/agent/advertiser terms; no-compensation stance | ☐ draft needed | ☐ pending |
-| Acceptable Use Policy (AUP) | Listing accuracy, prohibited conduct, enforcement ladder mapping | ☐ draft needed | ☐ pending |
-| Privacy Policy | Personal data, public vs member-only fields, retention, audit log | ☐ draft needed | ☐ pending |
-| DPA / off-island transfer basis | Cayman → hosting (Netlify/Neon) data transfer lawful basis | ☐ analysis needed | ☐ pending |
+| Membership Agreement | Member/broker/agent/advertiser terms; no-compensation stance | ✅ `legal/Membership_Agreement.DRAFT.md` | ☐ pending |
+| Acceptable Use Policy (AUP) | Listing accuracy, prohibited conduct, enforcement ladder mapping | ✅ `legal/Acceptable_Use_Policy.DRAFT.md` | ☐ pending |
+| Privacy Policy | Personal data, public vs member-only fields, retention, audit log | ✅ `legal/Privacy_Policy.DRAFT.md` | ☐ pending |
+| DPA / off-island transfer basis | Cayman → hosting (Netlify/Neon) data transfer lawful basis | ✅ `legal/DPA_Offisland_Transfer_Basis.DRAFT.md` (question set, not a conclusion) | ☐ pending |
 | Public disclaimers | Already shipped on tools/listings ("estimates only", "not a valuation/party") | ✅ in product | ☐ confirm wording |
 
 ## Status
 
-**PENDING COUNSEL — launch-blocking.** No document has counsel sign-off.
-This is an [OWNER] action: engage counsel, capture approved final text,
-record sign-off (date + reviewer) here, then check the U7 gate item in
-`Launch_Runbook.md` and the Roadmap.
+**DRAFTS PREPARED — PENDING COUNSEL — launch-blocking.** All four drafts
+exist under `governance/legal/` (start with `Counsel_Review_Cover_Note.md`)
+and are clearly marked "DRAFT — NOT LEGAL ADVICE". They reflect how the
+system actually behaves and flag every legal decision as a `[BRACKET]`
+placeholder or an explicit open question rather than inventing answers.
+**No document has counsel sign-off; drafting is not review.**
 
-> Recommendation: drafting the four documents and the DPA transfer analysis
-> can proceed in parallel with U4/U6 engineering; only **sign-off** gates
-> launch. If you want, the agent can draft starting text for counsel to
-> redline (clearly marked "DRAFT — NOT LEGAL ADVICE"), but that does not
-> substitute for review.
+Remaining [OWNER] action: engage counsel, supply the bracketed inputs
+(entity, processors/regions, retention, governing law), capture approved
+final text, record sign-off (date + reviewer) here, then check the U7 gate
+item in `Launch_Runbook.md` and the Roadmap.
+
+> Per the recorded U7 owner waiver, launch may proceed without sign-off;
+> the residual legal risk remains explicitly owner-accepted until counsel
+> completes this. These drafts exist so that risk can still be closed
+> properly post-haste.
