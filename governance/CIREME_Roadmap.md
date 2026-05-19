@@ -46,7 +46,7 @@ and are not re-opened except via a recorded override:
 | **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Approved — implemented (v1)** |
 | **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Approved — implemented (v1)** |
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Approved — implemented (v1)** |
-| **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Delivered (v1) — awaiting approval** |
+| **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Approved — implemented (v1)** |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
 | **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | Pending |
@@ -350,3 +350,7 @@ and can begin in parallel now.
   no private key, (e) the member gate admits exactly the MLS roles
   (public_user/advertiser excluded). 43 tests pass; typecheck/lint/build
   green.
+- **U3 — APPROVED.** Product owner approved cooperation & member-only data
+  as delivered (v1). Exit criterion (authorization tests) was met at
+  delivery. U6 is the next critical-path phase (depends on U2 ✓, U4); U4/U5
+  remain off the critical path; U7 (legal) can run in parallel.
