@@ -6,6 +6,7 @@ import { complianceActions, complianceIssues, listings } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import { ForbiddenError, requirePermission } from "@/lib/auth-guard";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
+import ComplianceBulkPanel from "./ComplianceBulkPanel";
 import {
   dismissIssueAction,
   recordActionAction,
@@ -97,6 +98,14 @@ export default async function CompliancePage() {
       {rows.length === 0 ? (
         <p className="muted">No open issues. Nothing needs a decision.</p>
       ) : (
+        <>
+        <ComplianceBulkPanel
+          issues={rows.map((r) => ({
+            id: r.id,
+            type: r.type,
+            listingRef: r.listingRef,
+          }))}
+        />
         <ul style={{ listStyle: "none", padding: 0 }}>
           {rows.map((issue) => {
             const history = actionsByIssue.get(issue.id) ?? [];
@@ -220,6 +229,7 @@ export default async function CompliancePage() {
             );
           })}
         </ul>
+        </>
       )}
     </main>
   );

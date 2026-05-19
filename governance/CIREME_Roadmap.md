@@ -48,8 +48,8 @@ and are not re-opened except via a recorded override:
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Approved — implemented (v1)** |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Approved — implemented (v1)** |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | **Approved — implemented (v1)** |
-| **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | **Delivered (v1) — awaiting approval** |
-| **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | Pending |
+| **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | **Approved — implemented (v1)** |
+| **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | **Delivered (v1) — awaiting approval** |
 | **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **Approved (OWNER WAIVER) — counsel review & restore drill NOT performed; residual legal/DR risk accepted by owner** |
 
 **Critical path:** U1 → U2 → U3 → U6 → U7. U4 and U5 run off the critical
@@ -416,3 +416,25 @@ and can begin in parallel now.
   (needs the schema; structural contract test stands in for v1);
   (2) machine-to-machine auth — v1 reuses the session (browser/member);
   API-key/OAuth client credentials for true system interop is a follow-on.
+- **U5 — APPROVED by owner.** RESO export/API accepted at v1; the two
+  flagged follow-ups (official RESO Data Dictionary certification;
+  machine-to-machine API auth) are carried forward in `Build_Ready_Spec.md`
+  §8, not lost.
+- **U6 — MLS-ready UX depth + build-ready spec: DELIVERED (v1), awaiting
+  approval.** Two tested pure modules added: `bulk-selection.ts` (selection
+  model + eligibility partition — bulk only ever loops an existing audited
+  per-item op, never new backend) and `responsive-table.ts`
+  (`resolveTableLayout`, md=768 stacked-card decision). Wired a **real**
+  bulk action over existing backend: compliance "dismiss false positives"
+  loops the existing audited `dismissComplianceIssue` (one audit row per
+  issue), driven by a contained client panel placed above the untouched
+  per-issue enforcement UI (low regression risk). Opt-in `.data-table--
+  stack` responsive CSS added. **Consolidated build-ready spec written**
+  (`governance/Build_Ready_Spec.md`) closing old Design 9–10 — marked
+  DRAFT awaiting owner sign-off (that sign-off IS the U6 gate). **Honest
+  deferrals (per the exit criterion):** detail drawers and the stacked-card
+  *paint* are deferred from automated testing with rationale — the repo has
+  no UI/E2E harness, so the testable *decisions* were extracted into the
+  pure modules above rather than shipping untested presentational code or
+  writing non-asserting tests. 57 tests pass; typecheck/lint/build green.
+  Spec sign-off does NOT close the U7 legal/DR risks (recorded, still open).

@@ -583,6 +583,33 @@ button:focus-visible,
   color: var(--n-900);
   vertical-align: top;
 }
+/* U6 responsive transform: opt-in stacked-card mode below the md
+   breakpoint (768px), matching resolveTableLayout() in
+   src/lib/responsive-table.ts. Tables opt in with .data-table--stack and
+   give each <td> a data-label; no field is hidden in stacked mode. */
+@media (max-width: 767px) {
+  .data-table--stack thead {
+    display: none;
+  }
+  .data-table--stack tr {
+    display: block;
+    border-top: 1px solid var(--n-200);
+  }
+  .data-table--stack td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    padding: 0.35rem 0.85rem;
+  }
+  .data-table--stack td::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--n-600);
+  }
+}
 .chipbar {
   display: flex;
   gap: 0.4rem;
