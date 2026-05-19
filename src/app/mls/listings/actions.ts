@@ -1,7 +1,9 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import type { Route } from "next";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/db";
@@ -11,6 +13,7 @@ import {
   changeListingPrice,
   createListing,
   transitionListingStatus,
+  updateListing,
 } from "@/lib/listing-service";
 import { addListingMedia, deleteListingMedia } from "@/lib/media-service";
 import { can } from "@/lib/rbac";
@@ -40,6 +43,40 @@ const createSchema = z.object({
   landBlock: z.string().trim().max(50).optional(),
   landParcel: z.string().trim().max(50).optional(),
   publicDescription: z.string().trim().max(4000).optional(),
+  bedrooms: z.coerce.number().int().min(0).max(100).optional(),
+  bathrooms: z.string().trim().regex(/^\d+(\.\d)?$/).optional(),
+  areaSqFt: z.coerce.number().int().min(0).max(100_000_000).optional(),
+  latitude: z.coerce.number().min(-90).max(90).optional(),
+  longitude: z.coerce.number().min(-180).max(180).optional(),
+});
+
+const editSchema = z.object({
+  listingId: z.string().uuid(),
+  title: z.string().trim().min(3).max(200),
+  propertyType: z.enum([
+    "residential",
+    "condo",
+    "land",
+    "commercial",
+    "multi_family",
+  ]),
+  district: z.enum([
+    "george_town",
+    "west_bay",
+    "bodden_town",
+    "north_side",
+    "east_end",
+    "cayman_brac",
+    "little_cayman",
+  ]),
+  tenure: z.enum(["freehold", "strata", "leasehold"]),
+  publicDescription: z.string().trim().max(4000).optional(),
+  landBlock: z.string().trim().max(50).optional(),
+  landParcel: z.string().trim().max(50).optional(),
+  bedrooms: z.coerce.number().int().min(0).max(100).optional(),
+  bathrooms: z.string().trim().regex(/^\d+(\.\d)?$/).optional(),
+  areaSqFt: z.coerce.number().int().min(0).max(100_000_000).optional(),
+  privateRemarks: z.string().trim().max(4000).optional(),
   latitude: z.coerce.number().min(-90).max(90).optional(),
   longitude: z.coerce.number().min(-180).max(180).optional(),
 });
@@ -91,21 +128,77 @@ export async function createListingAction(formData: FormData) {
     landBlock: formData.get("landBlock") || undefined,
     landParcel: formData.get("landParcel") || undefined,
     publicDescription: formData.get("publicDescription") || undefined,
+    bedrooms: formData.get("bedrooms") || undefined,
+    bathrooms: formData.get("bathrooms") || undefined,
+    areaSqFt: formData.get("areaSqFt") || undefined,
     latitude: formData.get("latitude") || undefined,
     longitude: formData.get("longitude") || undefined,
   });
   if (!parsed.success) return;
 
-  const { latitude, longitude, ...rest } = parsed.data;
+  const { latitude, longitude, bedrooms, bathrooms, areaSqFt, ...rest } =
+    parsed.data;
   await createListing({
     ...rest,
     agentId: user.id,
     officeId: null,
     priceKyd: rest.priceKyd ?? null,
+    bedrooms: bedrooms ?? null,
+    bathrooms: bathrooms ?? null,
+    areaSqFt: areaSqFt ?? null,
     latitude: latitude != null ? String(latitude) : null,
     longitude: longitude != null ? String(longitude) : null,
   });
   revalidatePath("/mls/listings");
+}
+
+export async function updateListingAction(formData: FormData) {
+  const user = await requirePermission("listing:edit:own");
+  const parsed = editSchema.safeParse({
+    listingId: formData.get("listingId"),
+    title: formData.get("title"),
+    propertyType: formData.get("propertyType"),
+    district: formData.get("district"),
+    tenure: formData.get("tenure"),
+    publicDescription: formData.get("publicDescription") || undefined,
+    landBlock: formData.get("landBlock") || undefined,
+    landParcel: formData.get("landParcel") || undefined,
+    bedrooms: formData.get("bedrooms") || undefined,
+    bathrooms: formData.get("bathrooms") || undefined,
+    areaSqFt: formData.get("areaSqFt") || undefined,
+    privateRemarks: formData.get("privateRemarks") || undefined,
+    latitude: formData.get("latitude") || undefined,
+    longitude: formData.get("longitude") || undefined,
+  });
+  if (!parsed.success) {
+    redirect(
+      `/mls/listings/${formData.get("listingId")}/edit?error=1` as Route,
+    );
+  }
+
+  const { listingId, latitude, longitude, ...f } = parsed.data;
+  await assertCanEdit(user, listingId);
+  await updateListing({
+    listingId,
+    actorId: user.id,
+    fields: {
+      title: f.title,
+      propertyType: f.propertyType,
+      district: f.district,
+      tenure: f.tenure,
+      publicDescription: f.publicDescription ?? null,
+      landBlock: f.landBlock ?? null,
+      landParcel: f.landParcel ?? null,
+      bedrooms: f.bedrooms ?? null,
+      bathrooms: f.bathrooms ?? null,
+      areaSqFt: f.areaSqFt ?? null,
+      privateRemarks: f.privateRemarks ?? null,
+      latitude: latitude != null ? String(latitude) : null,
+      longitude: longitude != null ? String(longitude) : null,
+    },
+  });
+  revalidatePath("/mls/listings");
+  redirect(`/mls/listings/${listingId}/edit?saved=1` as Route);
 }
 
 export async function transitionAction(formData: FormData) {

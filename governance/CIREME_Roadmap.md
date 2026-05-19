@@ -45,7 +45,7 @@ and are not re-opened except via a recorded override:
 |---|---|---|---|---|---|---|
 | **U1** | Broker experience | The brokerage workspace | Design + build broker workspace in the existing shell: My Agents, Group Listings, Brokerage Profile (read-only office context — no office-mutation backend yet); reuse existing services/state machines | Admin v1 | Yes | **Approved — implemented (v1)** |
 | **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Approved — implemented (v1)** |
-| **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | Pending |
+| **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Delivered (v1) — awaiting approval** |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | Pending |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
@@ -290,3 +290,29 @@ and can begin in parallel now.
   remain a noted follow-up (consistent with the repo's existing no-DB-test
   pattern for page/query code), not a blocker for approval. U2 (Agent
   experience) is now the active phase on the critical path.
+- **U2 — Agent experience: DELIVERED (v1), awaiting approval.** Hardened the
+  authoring path into the unified workspace shell and added the missing
+  edit capability. New audited mutation `updateListing` in
+  `listing-service.ts` (descriptive fields only — price stays in
+  `changeListingPrice`, status in `transitionListingStatus`; audit
+  before/after carries only changed fields) — the one new mutation U2
+  genuinely needed (a draft previously could not be edited at all, so the
+  completeness gate was unreachable for fields absent from the create form).
+  `updateListingAction` + `editSchema` with `assertCanEdit` (agents own
+  only). New per-listing **edit page** `/mls/listings/[id]/edit`: full field
+  form, a **publication-readiness checklist** (reuses `validateCompleteness`
+  — title/type/district/tenure/price/description/landBlock/landParcel + ≥1
+  photo), price (existing `changeListingPrice`), status transitions
+  (existing `transitionListingStatus`), media (existing add/delete) — all
+  reused, no new state machine. **My Listings** rebuilt into the shell:
+  eyebrow/title, status-filter chips, cards showing status badge + price +
+  photo count + readiness summary, linking to the edit page. Create form
+  moved into the shell and gained bedrooms/bathrooms/area + textarea
+  description (createSchema extended; `createListing` already supported
+  them). Completeness is enforced server-side by the existing transition
+  engine; the UI now surfaces it. Typecheck / lint / build green; 38 tests
+  pass. **Deferred (explicit, consistent with the "no bulk backend; flag,
+  don't fake" precedent):** optional CSV import — it is a new bulk mutation
+  with no backend; left as a flagged follow-on rather than a fake importer.
+  Open follow-up unchanged: authoring-path automated tests (repo's no-DB
+  test pattern) — noted, not a blocker.

@@ -1,18 +1,13 @@
+import type { Route } from "next";
 import { desc, eq, inArray } from "drizzle-orm";
 import Link from "next/link";
 
 import { db } from "@/db";
 import { listingMedia, listings } from "@/db/schema";
 import { ForbiddenError, requirePermission } from "@/lib/auth-guard";
-import { allowedTransitions } from "@/lib/listing-lifecycle";
+import { validateCompleteness } from "@/lib/listing-lifecycle";
 import { can } from "@/lib/rbac";
-import {
-  changePriceAction,
-  createListingAction,
-  deleteMediaAction,
-  transitionAction,
-  uploadMediaAction,
-} from "./actions";
+import { createListingAction } from "./actions";
 import PropertyMap from "@/components/PropertyMap";
 import ListingModeration from "./ListingModeration";
 
@@ -35,6 +30,18 @@ const DISTRICTS = [
   "little_cayman",
 ] as const;
 const TENURES = ["freehold", "strata", "leasehold"] as const;
+const STATUS_FILTERS = [
+  "all",
+  "draft",
+  "incomplete",
+  "active",
+  "pending",
+  "sold",
+  "withdrawn",
+  "expired",
+  "off_market",
+  "canceled",
+] as const;
 
 export default async function ListingsAdminPage({
   searchParams,
@@ -68,8 +75,7 @@ export default async function ListingsAdminPage({
     }
   }
 
-  // Admins (listing:moderate) get the read-only moderation registry;
-  // agents/brokers keep the authoring view below.
+  // Admins (listing:moderate) get the read-only moderation registry.
   if (can(user.role, "listing:moderate")) {
     return <ListingModeration status={status} />;
   }
@@ -94,24 +100,31 @@ export default async function ListingsAdminPage({
         .select()
         .from(listingMedia)
         .where(inArray(listingMedia.listingId, ids))
-        .orderBy(listingMedia.position)
     : [];
-  const mediaByListing = new Map<string, typeof mediaRows>();
+  const mediaCount = new Map<string, number>();
   for (const m of mediaRows) {
-    const list = mediaByListing.get(m.listingId) ?? [];
-    list.push(m);
-    mediaByListing.set(m.listingId, list);
+    mediaCount.set(m.listingId, (mediaCount.get(m.listingId) ?? 0) + 1);
   }
+
+  const filter = (STATUS_FILTERS as readonly string[]).includes(status ?? "")
+    ? status!
+    : "all";
+  const visible =
+    filter === "all" ? rows : rows.filter((r) => r.status === filter);
 
   return (
     <main>
+      <p className="eyebrow">Workspace</p>
+      <h1 style={{ marginTop: 0 }}>{seesAll ? "All listings" : "My listings"}</h1>
       <p className="muted">
-        <Link href="/mls/dashboard">← MLS Core</Link>
+        Create a draft, then open a listing to complete it, add photos, set
+        price and publish.
       </p>
-      <h1>{seesAll ? "All listings" : "My listings"}</h1>
 
       <details className="card" style={{ marginBottom: "1.5rem" }}>
-        <summary style={{ cursor: "pointer" }}>New listing</summary>
+        <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+          New listing
+        </summary>
         <form
           action={createListingAction}
           style={{ marginTop: "1rem", maxWidth: 520 }}
@@ -154,17 +167,33 @@ export default async function ListingsAdminPage({
             Price (KYD)
             <input name="priceKyd" placeholder="950000.00" />
           </label>
-          <label>
-            Land Block
-            <input name="landBlock" placeholder="12A" />
-          </label>
-          <label>
-            Land Parcel
-            <input name="landParcel" placeholder="345" />
-          </label>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <label style={{ flex: 1 }}>
+              Land Block
+              <input name="landBlock" placeholder="12A" />
+            </label>
+            <label style={{ flex: 1 }}>
+              Land Parcel
+              <input name="landParcel" placeholder="345" />
+            </label>
+          </div>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <label style={{ flex: 1 }}>
+              Bedrooms
+              <input name="bedrooms" inputMode="numeric" />
+            </label>
+            <label style={{ flex: 1 }}>
+              Bathrooms
+              <input name="bathrooms" inputMode="decimal" placeholder="2.5" />
+            </label>
+            <label style={{ flex: 1 }}>
+              Area (sq ft)
+              <input name="areaSqFt" inputMode="numeric" />
+            </label>
+          </div>
           <label>
             Public description
-            <input name="publicDescription" />
+            <textarea name="publicDescription" rows={3} />
           </label>
           <div style={{ marginTop: "0.75rem" }}>
             <span style={{ display: "block", fontWeight: 600 }}>
@@ -172,10 +201,13 @@ export default async function ListingsAdminPage({
             </span>
             <span
               className="muted"
-              style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.5rem" }}
+              style={{
+                display: "block",
+                fontSize: "0.85rem",
+                marginBottom: "0.5rem",
+              }}
             >
-              Drop a pin on the property, or use your current location. Coarse
-              location only — never a substitute for Block &amp; Parcel.
+              Coarse location only — never a substitute for Block &amp; Parcel.
             </span>
             <PropertyMap editable height={300} />
           </div>
@@ -185,148 +217,88 @@ export default async function ListingsAdminPage({
         </form>
       </details>
 
+      <div className="chipbar">
+        {STATUS_FILTERS.map((s) => (
+          <Link
+            key={s}
+            href={
+              (s === "all"
+                ? "/mls/listings"
+                : `/mls/listings?status=${s}`) as Route
+            }
+            className="chip"
+            aria-current={filter === s ? "true" : undefined}
+          >
+            {s.replace(/_/g, " ")}
+          </Link>
+        ))}
+      </div>
+
       {rows.length === 0 ? (
-        <p className="muted">No listings yet.</p>
+        <p className="muted">
+          No listings yet — create your first draft above.
+        </p>
+      ) : visible.length === 0 ? (
+        <p className="muted">No listings with status “{filter}”.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {rows.map((listing) => {
-            const next = allowedTransitions(listing.status);
+          {visible.map((listing) => {
+            const mc = mediaCount.get(listing.id) ?? 0;
+            const completeness = validateCompleteness(listing, mc);
             return (
               <li
                 key={listing.id}
                 className="card"
-                style={{ marginBottom: "1rem" }}
+                style={{ marginBottom: "1rem", background: "var(--surface)" }}
               >
-                <div>
-                  <strong>{listing.title}</strong>{" "}
-                  <span className="muted">
-                    · {listing.publicReference} · {listing.status} ·{" "}
-                    {listing.priceKyd ? `KYD ${listing.priceKyd}` : "no price"}
-                  </span>
-                </div>
-
-                {next.length > 0 ? (
-                  <form
-                    action={transitionAction}
-                    style={{
-                      display: "flex",
-                      gap: "0.5rem",
-                      alignItems: "center",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    <input
-                      type="hidden"
-                      name="listingId"
-                      value={listing.id}
-                    />
-                    <select name="toStatus" required>
-                      {next.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <button type="submit">Change status</button>
-                  </form>
-                ) : (
-                  <p className="muted" style={{ fontSize: "0.8rem" }}>
-                    Terminal status — no transitions.
-                  </p>
-                )}
-
-                <form
-                  action={changePriceAction}
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    alignItems: "center",
-                    marginTop: "0.5rem",
-                  }}
-                >
-                  <input type="hidden" name="listingId" value={listing.id} />
-                  <input
-                    name="newPriceKyd"
-                    placeholder="New price KYD"
-                    style={{ margin: 0, maxWidth: 200 }}
-                  />
-                  <button type="submit">Update price</button>
-                </form>
-
                 <div
                   style={{
                     display: "flex",
-                    gap: "0.5rem",
+                    justifyContent: "space-between",
+                    gap: "1rem",
                     flexWrap: "wrap",
-                    marginTop: "0.5rem",
                   }}
                 >
-                  {(mediaByListing.get(listing.id) ?? []).map((m) => (
-                    <form
-                      key={m.id}
-                      action={deleteMediaAction}
-                      style={{ position: "relative" }}
+                  <div>
+                    <Link
+                      href={`/mls/listings/${listing.id}/edit` as Route}
+                      style={{ fontWeight: 600 }}
                     >
-                      <input
-                        type="hidden"
-                        name="listingId"
-                        value={listing.id}
-                      />
-                      <input type="hidden" name="mediaId" value={m.id} />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`/api/media/${m.blobKey}`}
-                        alt={m.caption ?? "listing media"}
-                        style={{
-                          height: 64,
-                          width: 64,
-                          objectFit: "cover",
-                          borderRadius: 6,
-                          display: "block",
-                        }}
-                      />
-                      <button
-                        type="submit"
-                        title="Remove"
-                        style={{
-                          position: "absolute",
-                          top: -6,
-                          right: -6,
-                          background: "#c0392b",
-                          color: "#fff",
-                          borderRadius: "50%",
-                          width: 20,
-                          height: 20,
-                          lineHeight: "20px",
-                          padding: 0,
-                          fontSize: 12,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </form>
-                  ))}
+                      {listing.title}
+                    </Link>
+                    <div className="muted" style={{ fontSize: "0.85rem" }}>
+                      {listing.publicReference} ·{" "}
+                      {listing.district.replace(/_/g, " ")} ·{" "}
+                      {listing.priceKyd
+                        ? `KYD ${listing.priceKyd}`
+                        : "no price"}{" "}
+                      · {mc} photo{mc === 1 ? "" : "s"}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <span className={`badge badge--${listing.status}`}>
+                      {listing.status.replace(/_/g, " ")}
+                    </span>
+                    <div
+                      className="muted"
+                      style={{ fontSize: "0.78rem", marginTop: "0.35rem" }}
+                    >
+                      {completeness.ok
+                        ? "✓ ready to publish"
+                        : `${completeness.missing.length} item${
+                            completeness.missing.length === 1 ? "" : "s"
+                          } missing`}
+                    </div>
+                  </div>
                 </div>
-
-                <form
-                  action={uploadMediaAction}
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    alignItems: "center",
-                    marginTop: "0.5rem",
-                  }}
-                >
-                  <input type="hidden" name="listingId" value={listing.id} />
-                  <input
-                    type="file"
-                    name="file"
-                    accept="image/*"
-                    required
-                    style={{ margin: 0 }}
-                  />
-                  <button type="submit">Upload image</button>
-                </form>
+                <div style={{ marginTop: "0.6rem" }}>
+                  <Link
+                    href={`/mls/listings/${listing.id}/edit` as Route}
+                    className="btn-outline"
+                  >
+                    Open &amp; edit
+                  </Link>
+                </div>
               </li>
             );
           })}

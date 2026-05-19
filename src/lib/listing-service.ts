@@ -211,3 +211,64 @@ export async function changeListingPrice(params: {
     return updated;
   });
 }
+
+/**
+ * Edits a listing's descriptive fields (NOT price — see `changeListingPrice`;
+ * NOT status — see `transitionListingStatus`). One audited transaction; the
+ * audit `before`/`after` carry only the fields that actually changed.
+ * Authority is enforced at the call site (assertCanEdit).
+ */
+type EditableListingFields = {
+  title: string;
+  propertyType: (typeof listings.$inferInsert)["propertyType"];
+  district: (typeof listings.$inferInsert)["district"];
+  tenure: (typeof listings.$inferInsert)["tenure"];
+  publicDescription: string | null;
+  landBlock: string | null;
+  landParcel: string | null;
+  bedrooms: number | null;
+  bathrooms: string | null;
+  areaSqFt: number | null;
+  latitude: string | null;
+  longitude: string | null;
+  privateRemarks: string | null;
+};
+
+export async function updateListing(params: {
+  listingId: string;
+  fields: EditableListingFields;
+  actorId: string;
+}) {
+  const { listingId, fields, actorId } = params;
+
+  return db.transaction(async (tx) => {
+    const listing = await loadListing(tx, listingId);
+
+    const before: Record<string, unknown> = {};
+    const after: Record<string, unknown> = {};
+    for (const key of Object.keys(fields) as (keyof EditableListingFields)[]) {
+      if (listing[key] !== fields[key]) {
+        before[key] = listing[key];
+        after[key] = fields[key];
+      }
+    }
+    if (Object.keys(after).length === 0) return listing;
+
+    const [updated] = await tx
+      .update(listings)
+      .set({ ...fields, updatedAt: new Date() })
+      .where(eq(listings.id, listingId))
+      .returning();
+
+    await tx.insert(auditLog).values({
+      actorId,
+      entity: "listing",
+      entityId: listingId,
+      action: "listing_updated",
+      before,
+      after,
+    });
+
+    return updated;
+  });
+}
