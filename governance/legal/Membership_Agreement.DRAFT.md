@@ -10,16 +10,56 @@
 
 ## 1. What CIREME is — and is not
 
-1.1 CIREME is a Cayman Islands real-estate listing and member-data
-platform. It complements existing services in a defined niche.
+1.1 CIREME is a Cayman Islands **real-estate marketing, promotion,
+listing-information, and IT-support platform**. It complements existing
+services in a defined niche.
 
-1.2 **CIREME is not a party to any real-estate transaction.** It is not a
-broker, agent, escrow agent, or valuer in any listing. It does **not** set,
-collect, broker, or facilitate any commission, buyer-agent compensation,
-or cooperation fee, and holds no such data. Nothing in the platform
-constitutes an offer, valuation, or professional advice.
+1.2 **Licensing basis (qualified — must be re-confirmed).** A Cayman
+Islands Trade & Business Licence was *originally reflected* for the
+underlying business, on the following terms as recorded on the licence
+document provided:
 
-1.3 Estimates, indices, and market tools are **indicative only** and are
+- Ref No. 30624; Licence No. 95640.
+- Issued under the **Trade and Business Licensing Act (2021 Revision),
+  section 21**.
+- Licensee (as recorded): **ROBERT NORMAN LYNCH T/A CAYMAN ISLANDS REAL
+  ESTATE MARKET EXPLORER**.
+- Premises (as recorded): Block 20B, Parcel 342 H49, Unit 112 Canon
+  Place, George Town, Grand Cayman, Cayman Islands.
+- Licensed activity (as recorded): **REAL ESTATE MARKETING, PROMOTION,
+  AND IT SUPPORT**.
+- Effective period (as recorded): **2 November 2023 to 2 November 2024**.
+- Condition (as recorded): no advertising signs at the premises without
+  Central Planning Authority approval.
+
+The scope of CIREME is intended to remain within that historically
+licensed activity (real-estate marketing, promotion, listing information,
+and IT support). **This Agreement does not assert that the licence is
+currently active.** Because the recorded effective period has elapsed,
+the **current licensing status, the correct contracting legal entity, and
+the registered address must be confirmed by the owner and counsel before
+this Agreement is finalised or adopted** (`[LEGAL ENTITY NAME]`,
+`[REGISTERED ADDRESS]`, `[CURRENT LICENCE STATUS]`).
+
+1.3 **CIREME is not a party to any real-estate transaction.** It is **not**
+a real-estate broker, real-estate agent, valuer/appraiser, escrow
+provider, conveyancer, or lender, and is not an agent for any party to a
+listing. It does **not** set, collect, broker, or facilitate any
+commission, buyer-agent compensation, cooperation fee, or transaction
+payment, and holds no such data. Nothing in the platform constitutes an
+offer, a valuation, conveyancing, escrow, lending, agency, or any other
+regulated real-estate service or professional advice.
+
+1.4 **Marketing/IT-support vs. regulated services (distinction).** The
+services CIREME provides are limited to real-estate **marketing,
+promotion, listing-information presentation, and IT support** for members
+who market their own listings. They are **distinct from, and do not
+include,** regulated brokerage, agency representation, valuation/appraisal,
+conveyancing, escrow, or lending services, none of which CIREME performs
+or holds itself out as performing. Members remain solely responsible for
+their own licensing and for any regulated activity they conduct.
+
+1.5 Estimates, indices, and market tools are **indicative only** and are
 not valuations or financial advice.
 
 ## 2. Membership tiers and eligibility
@@ -106,7 +146,11 @@ constitutes acceptance.
 resolved via `[DISPUTE FORUM — counsel]`.
 
 ---
-*Counsel review checklist: §1.2 no-compensation language sufficient and
-consistent with positioning; §2.3 admin-mediated access reflected; §3.3
-member data-handling allocation; §5 enforcement ladder enforceable with
-due process; §7 liability under Cayman law; all `[BRACKETS]` resolved.*
+*Counsel review checklist: §1.2 licensing status / contracting entity
+re-confirmed (licence period elapsed — not asserted as active); §1.3–1.4
+no-compensation and not-a-broker/agent/valuer/escrow/conveyancer/lender
+language sufficient and consistent with positioning, and the
+marketing/IT-support vs. regulated-services distinction adequate; §2.3
+admin-mediated access reflected; §3.3 member data-handling allocation; §5
+enforcement ladder enforceable with due process; §7 liability under Cayman
+law; all `[BRACKETS]` resolved.*

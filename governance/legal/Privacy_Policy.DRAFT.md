@@ -62,11 +62,35 @@ silently delete or alter audit entries; advise the lawful approach.]`
 
 - **Members**, for legitimate real-estate contact (routed enquiries,
   member-only remarks).
-- **Service processors**: `[HOSTING PROCESSORS — confirm actual: app
-  hosting (e.g. Netlify), managed database (e.g. Neon), and regions]`,
-  under data-processing terms.
+- **Platform / hosting processors** (qualified — see 6.2).
 
-6.2 Off-island hosting transfer basis: see
+6.2 **Hosting and database (qualified — not yet confirmed).** Based on
+Netlify's published platform documentation, the application is built on
+the Netlify platform and uses **Netlify Database**, which Netlify
+documents as a fully managed Postgres database built into the Netlify
+platform, with Netlify handling provisioning, migrations, and branching,
+and usable from Functions, Edge Functions, Builds, and Agent Runners.
+Netlify's platform documentation further describes Netlify Database as
+provisioning a Postgres database instance **with Neon**. The **exact
+processors and sub-processors (including Netlify and Neon's roles),
+database region(s), service region(s), and the applicable data-processing
+terms are NOT yet confirmed** and must be verified from the live
+Netlify/Neon account and the vendors' contractual terms before this
+policy is finalised. No specific data-residency region or server location
+is asserted here.
+
+6.3 **Deploy-preview database branches (privacy/compliance issue).**
+Netlify's documentation describes production deploys as accessing the
+main database and **deploy previews as receiving their own database branch
+copied from production data when created**. A preview branch may therefore
+**contain copies of production personal data**. Counsel and the owner must
+assess and document: whether preview branches contain personal data; who
+can access preview environments; the lifecycle, retention, and deletion of
+preview branches; and whether this constitutes additional processing or a
+further transfer requiring a lawful basis and safeguards. See
+`DPA_Offisland_Transfer_Basis.DRAFT.md`.
+
+6.4 Off-island hosting transfer basis: see
 `DPA_Offisland_Transfer_Basis.DRAFT.md` — `[COUNSEL OPINION REQUIRED]`.
 
 ## 7. Retention
@@ -100,5 +124,7 @@ Updated with `[NOTICE METHOD]`; material changes notified to members.
 ---
 *Counsel review checklist: Cayman DPA applicability and lawful-basis
 mapping (§4); audit-log vs. erasure reconciliation (§5 — critical);
-processor list and transfer basis (§6, doc 4); retention periods (§7);
+processor/sub-processor list, regions and DPA terms still unconfirmed
+(§6.2); deploy-preview branches potentially containing production personal
+data (§6.3 — critical); transfer basis (doc 4); retention periods (§7);
 breach-notification obligations (§9); supervisory-authority route (§8).*

@@ -38,6 +38,64 @@ and positioned. If counsel's wording would change any of these, that is a
 5. **Cayman-specific.** Cayman Islands law governs; Block & Parcel, KYD,
    district model. No off-island legal assumptions.
 
+## Business Licence Qualification
+
+A Cayman Islands Trade & Business Licence document was provided and is
+*reflected* in the drafts on a **qualified, historical basis only**:
+
+- Ref No. 30624; Licence No. 95640.
+- Issued under the **Trade and Business Licensing Act (2021 Revision),
+  section 21**.
+- Licensee (as recorded): **ROBERT NORMAN LYNCH T/A CAYMAN ISLANDS REAL
+  ESTATE MARKET EXPLORER**.
+- Premises (as recorded): Block 20B, Parcel 342 H49, Unit 112 Canon
+  Place, George Town, Grand Cayman, Cayman Islands.
+- Licensed activity (as recorded): **REAL ESTATE MARKETING, PROMOTION,
+  AND IT SUPPORT**.
+- Effective period (as recorded): **2 November 2023 to 2 November 2024**.
+- Condition (as recorded): no advertising signs at the premises without
+  Central Planning Authority approval.
+
+The drafts use cautious language ("originally reflected", "historically
+licensed for") and **do not assert the licence is currently active** — the
+recorded period has elapsed and no renewed licence has been provided.
+CIREME is positioned strictly within the recorded licensed activity:
+real-estate **marketing, promotion, listing information, and IT support**.
+It is **not** described as, and must not be described as, a broker,
+real-estate agent, valuer/appraiser, escrow provider, conveyancer, lender,
+or transaction party, and not as setting/collecting/brokering/facilitating
+commissions, buyer-agent compensation, cooperation fees, or transaction
+payments. **Launch-blocking confirmation:** owner + counsel must confirm
+current licensing status, the renewed licence (if any), and the correct
+contracting legal entity/registered address before adoption.
+
+## Server / Database Qualification
+
+Hosting language in the drafts is **qualified to Netlify's published
+documentation and is not verified against the live account**:
+
+- The app is built on the **Netlify platform** and uses **Netlify
+  Database** — documented by Netlify as a fully managed Postgres database
+  built into the platform; Netlify handles provisioning, migrations, and
+  branching; usable from Functions, Edge Functions, Builds, and Agent
+  Runners.
+- Netlify's platform documentation describes Netlify Database as
+  provisioning a Postgres instance **with Neon**.
+- Netlify documents production deploys as accessing the **main database**
+  and **deploy previews as receiving their own database branch copied
+  from production data** — so preview branches may contain production
+  personal data (treated as a privacy/transfer issue in the Privacy
+  Policy §6.3 and the transfer-basis question set).
+
+**No specific data-residency region, server location, or final processor/
+sub-processor list is asserted.** Launch-blocking confirmations (owner +
+counsel): production database provider, region(s), processors,
+sub-processors, data-processing/DPA terms, whether preview database
+branches contain personal data, and the off-island transfer safeguards —
+together with current licensing status, contracting legal entity, and
+regions — **remain open and launch-blocking** (subject to the recorded
+U7 owner waiver, which does not close them).
+
 ## Decisions counsel / owner must supply (left as `[BRACKETS]`)
 
 The drafts deliberately do **not** invent these. Each appears as a

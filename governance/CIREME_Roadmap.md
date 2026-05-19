@@ -458,3 +458,19 @@ and can begin in parallel now.
   updated: drafts ✅, counsel status still ☐ pending. This does NOT close
   the U7 legal item — sign-off remains the owner action and the residual
   risk stays owner-accepted under the recorded waiver. No code change.
+- **U7 legal drafts — qualified with licence & hosting facts (still
+  drafts).** Membership Agreement, Privacy Policy, off-island transfer-
+  basis question set, and the counsel cover note updated to incorporate:
+  the provided Trade & Business Licence (Ref 30624 / Lic 95640, TBLA
+  (2021 Revision) s.21, licensee ROBERT NORMAN LYNCH T/A CAYMAN ISLANDS
+  REAL ESTATE MARKET EXPLORER, activity "real estate marketing, promotion
+  and IT support", period 2 Nov 2023–2 Nov 2024) using cautious
+  "originally reflected / not asserted as currently active" language; a
+  strengthened not-a-broker/agent/valuer/escrow/conveyancer/lender and
+  no-compensation distinction; and qualified Netlify-platform / Netlify
+  Database / Neon hosting language with deploy-preview database branching
+  flagged as a privacy/transfer issue. No data-residency region or final
+  processor list asserted. No legal conclusion made; all remain
+  counsel-review drafts and the U7 sign-off + licence/entity/processor/
+  region confirmations stay launch-blocking and owner-accepted under the
+  recorded waiver. No code change.
