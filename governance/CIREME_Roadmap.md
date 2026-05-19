@@ -316,3 +316,9 @@ and can begin in parallel now.
   with no backend; left as a flagged follow-on rather than a fake importer.
   Open follow-up unchanged: authoring-path automated tests (repo's no-DB
   test pattern) — noted, not a blocker.
+- **Fix — `/mls/login` now shows the activation success message.** The
+  activation flow redirected to `/mls/login?activated=1` but the login page
+  ignored the param (only read `error`/`as`), so members got no confirmation
+  after setting their password. Added a success banner ("Your account is
+  activated. You can now sign in.") shown when `activated=1`. No other
+  change. Typecheck / lint / build green; 38 tests pass.

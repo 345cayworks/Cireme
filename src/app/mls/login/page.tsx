@@ -16,9 +16,9 @@ export const metadata = { title: "Sign in — CIREME" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; as?: string }>;
+  searchParams: Promise<{ error?: string; as?: string; activated?: string }>;
 }) {
-  const { error, as } = await searchParams;
+  const { error, as, activated } = await searchParams;
   // `as` is a cosmetic hint only — never trusted for authorization.
   const role = as && ROLES[as] ? ROLES[as] : null;
 
@@ -58,6 +58,22 @@ export default async function LoginPage({
           For brokers, agents, and administrators. Access is determined by your
           account, not the entry you chose.
         </p>
+
+        {activated === "1" ? (
+          <p
+            role="status"
+            style={{
+              color: "var(--success)",
+              background: "var(--success-soft)",
+              padding: "0.6rem 0.85rem",
+              borderRadius: "var(--r-sm)",
+              fontSize: "0.9rem",
+              marginTop: "1rem",
+            }}
+          >
+            Your account is activated. You can now sign in.
+          </p>
+        ) : null}
 
         <LoginForm action={authenticate} hasError={error === "1"} />
 
