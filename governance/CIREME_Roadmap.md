@@ -49,7 +49,7 @@ and are not re-opened except via a recorded override:
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Approved — implemented (v1)** |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | **Approved — implemented (v1)** |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | **Approved — implemented (v1)** |
-| **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | **Delivered (v1) — awaiting approval** |
+| **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | **Approved — implemented (v1); build-ready spec signed** |
 | **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **Approved (OWNER WAIVER) — counsel review & restore drill NOT performed; residual legal/DR risk accepted by owner** |
 
 **Critical path:** U1 → U2 → U3 → U6 → U7. U4 and U5 run off the critical
@@ -438,3 +438,11 @@ and can begin in parallel now.
   pure modules above rather than shipping untested presentational code or
   writing non-asserting tests. 57 tests pass; typecheck/lint/build green.
   Spec sign-off does NOT close the U7 legal/DR risks (recorded, still open).
+- **U6 — APPROVED by owner; build-ready spec SIGNED (2026-05-19).** The U6
+  gate is closed: `governance/Build_Ready_Spec.md` is owner-signed,
+  flipped from DRAFT. **All unified build phases U1–U6 are now approved.**
+  The signed spec records — and does NOT close — the standing U7 risks:
+  counsel review and the backup/restore drill were waived and never
+  performed; residual legal/DR risk remains explicitly owner-accepted.
+  `Legal_Review_Status.md` and `Backup_Restore_Drill.md` stay open. No
+  code change in this step (governance/sign-off only).

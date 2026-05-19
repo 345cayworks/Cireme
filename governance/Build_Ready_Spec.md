@@ -1,6 +1,8 @@
 # CIREME — Consolidated Build-Ready Specification
 
-> **Status: DRAFT — awaiting owner sign-off (U6 gate exit criterion).**
+> **Status: SIGNED OFF BY OWNER (2026-05-19) — U6 gate closed.** Sign-off
+> closes the U6 gate only; it explicitly does **not** close the §11 launch
+> risks (U7 legal/DR), which remain open.
 > This is the single consolidated implementation reference that closes the
 > old Design phases 9–10. It describes **what is actually built and on
 > `main`**, not aspiration. It does not supersede `CIREME_Roadmap.md`
@@ -123,3 +125,8 @@ reso-export, bulk-selection, responsive-table. `npm run typecheck`,
 
 Owner sign-off on this document satisfies the U6 gate. Sign-off does
 **not** close the §11 risks.
+
+**SIGNED OFF — product owner, 2026-05-19.** U6 gate closed; all unified
+build phases (U1–U6) are now approved. The §11 risks (U7 counsel review,
+backup/restore drill — both waived and NOT performed) remain explicitly
+open and accepted by the owner; this sign-off does not change that.
