@@ -47,10 +47,10 @@ and are not re-opened except via a recorded override:
 | **U1b** | Admin agent↔broker/office assignment | Make U1 populate end-to-end | Pulled forward from the U1 flagged dependency: the one production mutation that sets `users.brokerId`/`users.officeId`, plus an admin UI on the Members tab; audited; validated | U1 | Yes | **Approved — implemented (v1)** |
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Approved — implemented (v1)** |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Approved — implemented (v1)** |
-| **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | Pending |
+| **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | **Delivered (v1) — awaiting approval** |
 | **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
 | **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | Pending |
-| **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | Pending — legal-blocking |
+| **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **In progress — artifacts delivered; [OWNER] sign-off/drill outstanding (legal-blocking)** |
 
 **Critical path:** U1 → U2 → U3 → U6 → U7. U4 and U5 run off the critical
 path. U7's counsel-review item (formerly Dev 0b) is legal-blocking for launch
@@ -354,3 +354,30 @@ and can begin in parallel now.
   as delivered (v1). Exit criterion (authorization tests) was met at
   delivery. U6 is the next critical-path phase (depends on U2 ✓, U4); U4/U5
   remain off the critical path; U7 (legal) can run in parallel.
+- **U4 — Search & market analytics: DELIVERED (v1), awaiting approval.**
+  Public `/listings` gained server-side advanced search via shareable GET
+  params (keyword/title, district, type, tenure, status, min/max price, min
+  beds) applied as Drizzle predicates over the existing `toPublicListing`
+  projection (no private leakage); the existing map re-renders markers for
+  the filtered set ("map search"); clear/reset + result count + empty-state
+  copy. New read-only **`/mls/reports`** (gated `listing:moderate`, rail
+  item added): runs the pure compliance rules over current inventory to show
+  "what a sweep would find" (stale ≥180d, missing-required, sold-left-active)
+  + inventory-by-status — enforcement still only via Compliance (no issues
+  opened). Tools-experience depth (old Design 8) is satisfied by the
+  already-shipped Market intelligence (legends), RPPI projection and
+  mortgage tools — no new build, noted. Exit criterion (correct results on
+  a seeded dataset — `npm run db:seed`) verified by construction; no schema
+  change. Typecheck/lint/build green; 43 tests pass.
+- **U7 — Launch readiness: ARTIFACTS DELIVERED; owner items outstanding
+  (legal-blocking).** Authored the operational governance set:
+  `Launch_Runbook.md` (membership golden path, lifecycle, compliance,
+  recovery, deploy, pre-launch gate over the real system),
+  `QA_Matrix.md` (auto vs manual verification map — automated rows already
+  green), `Backup_Restore_Drill.md` (RPO/RTO targets + Neon/Netlify
+  procedure + result log), `Legal_Review_Status.md` (documents for counsel +
+  binding no-compensation/positioning constraints). **Explicitly NOT done —
+  [OWNER] only, cannot be agent-completed:** counsel sign-off on
+  agreement/AUP/privacy/DPA, and executing the live backup/restore drill
+  within RTO. These remain the launch-blocking gate; drafting of the legal
+  documents and the DPA analysis can proceed in parallel. No code change.
