@@ -48,7 +48,7 @@ and are not re-opened except via a recorded override:
 | **U2** | Agent experience | First-class listing authoring | Design + build agent workspace: My Listings, Create/Edit Listing UX, Media, optional CSV import; harden the existing authoring path into the unified shell | U1 | Yes | **Approved — implemented (v1)** |
 | **U3** | Cooperation & member-only data | Cross-listing visibility (no compensation) | Listing brokerage/agent attribution, contact routing, member-only vs public remarks surfaced per the field classification; authorization tests | U2 | Yes | **Approved — implemented (v1)** |
 | **U4** | Search & market analytics | MLS-grade search + analytics | Advanced filters, map search, staleness/accuracy reporting; Tools-experience design depth (old Design 8) folded in | U3 | Soft | **Approved — implemented (v1)** |
-| **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | Pending |
+| **U5** | API & RESO export | Optional interoperability | Member API; one-way RESO-format export; role-aware access control; RESO Data Dictionary validation | U3 | No | **Delivered (v1) — awaiting approval** |
 | **U6** | MLS-ready UX expansion + build-ready spec | Depth + consolidated spec | Compliance/audit/lifecycle UX depth (drawers, bulk where backend exists, responsive table transforms); the consolidated build-ready spec (old Design 9–10) | U2, U4 | Yes | Pending |
 | **U7** | Launch readiness | Operationally launchable | Counsel review (membership agreement, AUP, privacy, DPA transfer basis); admin + membership-approval runbooks; legal text final; QA matrix; backup/restore drill within RTO | U1–U3, U6 | **Yes** | **Approved (OWNER WAIVER) — counsel review & restore drill NOT performed; residual legal/DR risk accepted by owner** |
 
@@ -395,3 +395,24 @@ and can begin in parallel now.
   recovery restore. `Legal_Review_Status.md` and `Backup_Restore_Drill.md`
   remain open and should still be closed post-haste; this waiver does not
   make them done. No code change.
+- **U5 — API & RESO export: DELIVERED (v1), awaiting approval.** One-way,
+  read-only RESO-aligned listing feed at `GET /api/reso/listings`,
+  member-only (JSON 401 if unauthenticated, 403 if not an MLS role — never
+  a redirect, since it's an API). New pure `reso-export.ts`: builds the feed
+  ONLY from the `PublicListing` projection (no private/internal field can
+  reach it — same discipline as public-safe/member-safe), maps to a
+  documented RESO Data Dictionary-style `Property` shape (StandardStatus,
+  PropertyType, ListPrice, BedroomsTotal, LivingArea, City, Lat/Long,
+  ModificationTimestamp, …) with KYD surfaced via the RESO `X_` extension
+  convention. **No buyer-agent compensation/cooperation fields emitted**
+  (RESO defines them; locked positioning forbids them — a test asserts
+  absence). Exit criterion partially met: access control is
+  **test-enforced** (`canAccessResoFeed` = `isMlsRole`, asserted across all
+  roles) and the export validates against the **documented field/shape
+  contract** (`reso-export.test.ts`: exact field set, enum mapping, no
+  private/compensation leakage, envelope). 49 tests pass; typecheck/lint/
+  build green. **Flagged follow-ups (honest scope):** (1) formal
+  certification against the *official* RESO Data Dictionary schema artifact
+  (needs the schema; structural contract test stands in for v1);
+  (2) machine-to-machine auth — v1 reuses the session (browser/member);
+  API-key/OAuth client credentials for true system interop is a follow-on.
